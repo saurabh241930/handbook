@@ -48,12 +48,10 @@ NodeJs heavily depends on **First class functions** and **Function expressions**
 
 <h3>First class function:</h3>
 
-```
-In JavaScript, functions are first-class objects, which means they can be
+*In JavaScript, functions are first-class objects, which means they can be
 stored in a variable, object, or array.
 passed as an argument to a function.
-returned from a function.eg:
-```
+returned from a function.eg:*
 
 ```javascript
 const foo = function() {
@@ -67,9 +65,8 @@ foo();
 
 <h3>Function expression:</h3>
 
-```
-A block of code that results in a value eg.
-```
+
+*A block of code that results in a value eg.*
 
 ```javascript
 var getRectArea = function(width, height) {
@@ -85,17 +82,12 @@ console.log(getRectArea(3,4));
 
 <h3>Function constructors:</h3>
 
-```
-The examples from the previous chapters are limited. They only create single objects.
 
+*The examples from the previous chapters are limited. They only create single objects.
 Sometimes we need a "blueprint" for creating many objects of the same "type".
-
 The way to create an "object type", is to use an object constructor function.
-
 In the example above, function Person() is an object constructor function.
-
-Objects of the same type are created by calling the constructor function with the new keyword
-```
+Objects of the same type are created by calling the constructor function with the new keyword*
 
 ```javascript
 function Person(first, last, age, eye) {
@@ -125,9 +117,9 @@ __proto__: Object
 
 <h3>Prototype in function : </h3>
 
-```
-When a function is created in JavaScript, JavaScript engine adds a prototype property to the function. This prototype property is an object (called as prototype object) has a constructor property by default. constructor property points back to the function on which prototype object is a property.
-```
+
+*When a function is created in JavaScript, JavaScript engine adds a prototype property to the function. This prototype property is an object (called as prototype object) has a constructor property by default. constructor property points back to the function on which prototype object is a property.*
+
 
 ```javascript
 function Person(first, last, age, eye) {
