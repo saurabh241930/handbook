@@ -27,7 +27,7 @@ Threads are a way for systems to run multiple operations concurrently. So every 
 If it sounds strange?. Let’s use this analogy.
 
 ```
-Imagine a restaurant with just one person serving food. When the demand for food increases, things would crazily go wrong. People would have to wait till all preceding orders were delivered. A way to solve this problem would be to employ more people to serve food right? This way, more customers would be served at once.
+Imagine a restaurant with just one person serving food. <br>When the demand for food increases, things would crazily go wrong. People would have to wait till all preceding orders were delivered.<br> A way to solve this problem would be to employ more people to serve food right? This way, more customers would be served at once.
 ```
 
 Each thread is a new employee and the browsers, well, hungry people. I’m sure you can get the point now.
