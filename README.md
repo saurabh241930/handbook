@@ -42,7 +42,7 @@ Each thread is a new employee and the browsers, well, hungry people. I’m sure 
 
 But this system has a downside.**It would get to a point where there’s a lot of requests and starting up new threads would consume a whole lot of memory and system resources.**
 
-<h2>***Strong Foundations of NodeJS***</h2>
+<h2>Strong Foundations of NodeJS</h2>
 
 **`Modules`** : *A reusable block of code whose existence does not accidentally imapct other code*(it was not present in vanilla JS)
 
@@ -54,10 +54,34 @@ NodeJs heavily depends on **First class functions** and **Function expressions**
 In JavaScript, functions are first-class objects, which means they can be
 stored in a variable, object, or array.
 passed as an argument to a function.
-returned from a function.
+returned from a function.eg:
+```
+
+```javascript
+const foo = function() {
+   console.log("foobar");
+}
+// Invoke it using the variable
+foo();
 ```
 
 
+
+<h3>Function expression:</h3>
+
+```
+A block of code that results in a value eg.
+```
+
+```
+var getRectArea = function(width, height) {
+    return width * height;
+}
+
+console.log(getRectArea(3,4));
+// expected output: 12
+
+```
 
 
 
