@@ -189,7 +189,7 @@ console.log(b, c.foo); // "2" "bar
 
 
 ```javascript
-A globally-scoped variable
+//A globally-scoped variable
 
 // global scope
 var a = 1;
@@ -197,7 +197,8 @@ var a = 1;
 function one() {
   alert(a); // alerts '1'
 }
-Local scope
+
+//Local scope
 
 // global scope
 var a = 1;
@@ -235,7 +236,8 @@ function one() {
 
   alert(a); // alerts '1' because the 'let' keyword uses block scoping
 }
-Intermediate: Object properties
+
+//Intermediate: Object properties
 
 var a = 1;
 
@@ -257,7 +259,9 @@ var six = (function() {
     alert(a); // alerts '6'
   };
 })();
-Advanced: Prototype-based scope resolution
+
+
+//Advanced: Prototype-based scope resolution
 
 var a = 1;
 
@@ -285,7 +289,8 @@ var x = 5;
     var x = 10;
     console.log(x); 
 })();
-This will print out undefined and 10 rather than 5 and 10 since JavaScript always moves variable declarations (not initializations) to the top of the scope, making the code equivalent to:
+
+//This will print out undefined and 10 rather than 5 and 10 since JavaScript always moves variable declarations (not initializations) to the top of the scope, making the code equivalent to:
 
 var x = 5;
 
@@ -295,7 +300,8 @@ var x = 5;
     x = 10;
     console.log(x); 
 })();
-Catch clause-scoped variable
+
+//Catch clause-scoped variable
 
 var e = 5;
 console.log(e);
