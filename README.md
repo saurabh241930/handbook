@@ -280,7 +280,9 @@ seven.prototype.b = 8;
 
 alert(new seven().a); // alerts '7'
 alert(new seven().b); // alerts '8'
-Global+Local: An extra complex Case
+
+
+//Global+Local: An extra complex Case
 
 var x = 5;
 
