@@ -94,7 +94,7 @@ The way to create an "object type", is to use an object constructor function.
 
 In the example above, function Person() is an object constructor function.
 
-Objects of the same type are created by calling the constructor function with the new keyword:
+Objects of the same type are created by calling the constructor function with the new keyword
 ```
 
 ```javascript
@@ -106,7 +106,48 @@ function Person(first, last, age, eye) {
 }
 
 var myFather = new Person("John", "Doe", 50, "blue");
-var myMother = new Person("Sally", "Rally", 48, "green");
+
+```
+
+if you log **myFather** 
+
+```
+Person {firstName: "John", lastName: "Doe", age: 50, eyeColor: "blue"}
+age: 50
+eyeColor: "blue"
+firstName: "John"
+lastName: "Doe"
+__proto__:
+constructor: ƒ Person(first, last, age, eye)
+__proto__: Object
+}
+```
+
+<h3>Prototype in function : </h3>
+
+```
+When a function is created in JavaScript, JavaScript engine adds a prototype property to the function. This prototype property is an object (called as prototype object) has a constructor property by default. constructor property points back to the function on which prototype object is a property.
+```
+
+```javascript
+function Person(first, last, age, eye) {
+    this.firstName = first;
+    this.lastName = last;
+    this.age = age;
+    this.eyeColor = eye;
+}
+
+Person.prototype.getFullName = function(){
+  var fullName = this.firstName + this.lastName
+  return fullName;
+}
+
+var myFather = new Person("John", "Doe", 50, "blue");
+
+//to call prototype
+
+console.log(myFather.getFullName())    // will give John Doe
+
 
 ```
 
