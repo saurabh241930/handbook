@@ -73,7 +73,7 @@ foo();
 A block of code that results in a value eg.
 ```
 
-```
+```javascript
 var getRectArea = function(width, height) {
     return width * height;
 }
@@ -82,6 +82,52 @@ console.log(getRectArea(3,4));
 // expected output: 12
 
 ```
+
+# lets Build a module
+
+
+
+creating our module file **greet.js**
+
+*greet.js*
+
+```javascript
+console.log("hello world")
+```
+
+
+creating our main **app.js** file & embeding module into it
+
+```javascript
+require("./greet.js")
+```
+
+if we run app.js in console we will get 
+`hello wolrd` in console
+
+to encapsulate specific function
+
+*greet.js*
+
+```javascript
+var greet = function(){
+console.log("hello world")
+}
+
+module.exports = greet;
+
+```
+
+
+and in our main **app.js** file & embeding module into it
+
+```javascript
+var greet = require("./greet.js")
+
+greet()
+
+```
+
 
 
 
