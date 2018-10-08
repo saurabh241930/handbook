@@ -42,9 +42,7 @@ Each thread is a new employee and the browsers, well, hungry people. I’m sure 
 
 But this system has a downside.**It would get to a point where there’s a lot of requests and starting up new threads would consume a whole lot of memory and system resources.**
 
-<h2>Strong Foundations of NodeJS</h2>
 
-**`Modules`** : *A reusable block of code whose existence does not accidentally imapct other code*(it was not present in vanilla JS)
 
 NodeJs heavily depends on **First class functions** and **Function expressions**
 
@@ -82,6 +80,44 @@ console.log(getRectArea(3,4));
 // expected output: 12
 
 ```
+
+
+
+<h3>Function constructors:</h3>
+
+```
+The examples from the previous chapters are limited. They only create single objects.
+
+Sometimes we need a "blueprint" for creating many objects of the same "type".
+
+The way to create an "object type", is to use an object constructor function.
+
+In the example above, function Person() is an object constructor function.
+
+Objects of the same type are created by calling the constructor function with the new keyword:
+```
+
+```javascript
+function Person(first, last, age, eye) {
+    this.firstName = first;
+    this.lastName = last;
+    this.age = age;
+    this.eyeColor = eye;
+}
+
+var myFather = new Person("John", "Doe", 50, "blue");
+var myMother = new Person("Sally", "Rally", 48, "green");
+
+```
+
+
+________________________________________________________________________________________________________________________________________
+
+
+<h2>Strong Foundations of NodeJS</h2>
+
+**`Modules`** : *A reusable block of code whose existence does not accidentally imapct other code*(it was not present in vanilla JS)
+
 
 # lets Build a module
 
