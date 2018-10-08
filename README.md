@@ -27,9 +27,8 @@ Threads are a way for systems to run multiple operations concurrently. So every 
 
 If it sounds strange?. Let’s use this analogy.
 
-<h3>Strong Foundations of NodeJS</h1>
 
-**`Modules`** : *A reusable block of code whose existence does not accidentally imapct other code*(it was not present in vanilla JS)
+
 
 
 
@@ -42,6 +41,24 @@ Imagine a restaurant with just one person serving food.When the demand for food 
 Each thread is a new employee and the browsers, well, hungry people. I’m sure you can get the point now.
 
 But this system has a downside.**It would get to a point where there’s a lot of requests and starting up new threads would consume a whole lot of memory and system resources.**
+
+<h3>Strong Foundations of NodeJS</h3>
+
+**`Modules`** : *A reusable block of code whose existence does not accidentally imapct other code*(it was not present in vanilla JS)
+
+NodeJs heavily depends on **First class functions** and **Function expressions**
+
+<h2>First class function</h1>:
+```
+In JavaScript, functions are first-class objects, which means they can be
+
+stored in a variable, object, or array.
+
+passed as an argument to a function.
+
+returned from a function.
+```
+
 
 
 
