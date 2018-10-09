@@ -656,7 +656,7 @@ ________________________________________________________________________________
 
 Node.js core API is based on asynchronous event-driven architecture in which certain kind of objects called emitters periodically emit events that cause listener objects to be called.**[** official defination on nodeJS site :)**]**
 
-To get in-depth knowledge on lets build a simple event **on** and **event**
+To get in-depth knowledge on lets build a simple event **on** and **emit** event
 
 emitter.js
 ```javascript
@@ -701,6 +701,16 @@ console.log('Hello!');
 emtr.emit('greet');
 
 ```
+
+when we run this
+
+```
+Hello!
+Somewhere, someone said hello.
+A greeting occurred!
+```
+
+In a **nutshell** think of **on** a event a event which is responsible to create a TODO list of event of name greet and **emit** is responsible to excecute each event in that TODO list
 
 
 
