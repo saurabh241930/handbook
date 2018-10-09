@@ -445,9 +445,19 @@ module.exports = {
      english:english,
      spanish:spanish
      
-     }
-     
-     ```
+     }  
+```
+
+and in our main **app.js** file 
+
+```javascript
+var greet = require("./greet.js")
+
+engilsh.greet()
+spanish.greet()
+
+```
+
 
 
 
