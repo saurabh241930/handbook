@@ -329,7 +329,7 @@ ________________________________________________________________________________
 **`Modules`** : *A reusable block of code whose existence does not accidentally imapct other code*(it was not present in vanilla JS)
 
 
-# lets Build a module
+# Deep dive into modules and exports
 
 
 
@@ -572,8 +572,34 @@ Hello world!!!!          greet5.js:4
 
 **Note that** pattern3 does not re run its module event code even though we call it multiple times,it **caches** the output and use that
 
+----------------------------------------------------------------------------------------------------------------------------------------
 
+<h2>modules.exports vs exports</h2>
 
+when our code run through node ,the exports which is a part of parameter in wrapper
+
+```javascript
+fn(module.exports,require,module,filename,dirname)
+
+//then it returns 
+
+return module.exports
+```
+
+here **exports** and **module.exports** both pointing to the same object
+
+when we run this
+
+```javascript
+exports = function() {
+	console.log('Hello');
+}
+
+console.log(exports);
+console.log(module.exports);
+```
+
+we will get
 
 
 
