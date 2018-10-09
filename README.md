@@ -656,6 +656,54 @@ ________________________________________________________________________________
 
 Node.js core API is based on asynchronous event-driven architecture in which certain kind of objects called emitters periodically emit events that cause listener objects to be called.**[** official defination on nodeJS site :)**]**
 
+To get in-depth knowledge on lets build a simple event **on** and **event**
+
+emitter.js
+```javascript
+
+//constructor for list which will have events 
+function Emitter() {
+	this.events = {};
+}
+
+Emitter.prototype.on = function(type, listener) {
+	this.events[type] = this.events[type] || [];  //if that property is present in array format OR create it if not
+	this.events[type].push(listener);
+}
+
+Emitter.prototype.emit = function(type) {
+	if (this.events[type]) {
+		this.events[type].forEach(function(listener) {
+			listener();  //emit each each event present in list
+		});
+	}
+}
+
+module.exports = Emitter;
+```
+
+importing it in **app.js**
+
+```javascript
+var Emitter = require('./emitter');
+
+var emtr = new Emitter();
+
+emtr.on('greet', function() {
+	console.log('Somewhere, someone said hello.');
+});
+
+emtr.on('greet', function() {
+	console.log('A greeting occurred!');
+});
+
+console.log('Hello!');
+emtr.emit('greet');
+
+```
+
+
+
  
  
 
