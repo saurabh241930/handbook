@@ -590,6 +590,7 @@ here **exports** and **module.exports** both pointing to the same object
 
 when we run this
 
+greet.js
 ```javascript
 exports = function() {
 	console.log('Hello');
@@ -599,7 +600,56 @@ console.log(exports);
 console.log(module.exports);
 ```
 
+app.js
+```javascript
+var greet = require('./greet');
+
+```
+
+
 we will get
+
+```
+[Function]
+{}
+```
+ this is a quirk  in JS ,initially **module.exports** point to object by refrence and so do **exports** but it is set equal to value thats why it created a new object since refrence is broken
+ But if we use **require** it will only pass **module.exports**
+ 
+ we can mutate the property by doing this
+ 
+ greet2.js
+```javascript
+  exports.greet = function() {
+	console.log('Hello');
+    }
+
+console.log(exports);
+console.log(module.exports);
+```
+
+app.js
+```javascript
+var greet = require('./greet');
+var greet2 = require('./greet2');
+greet2.greet();
+
+```
+
+
+we will get
+
+```
+[Function]
+{}
+{ greet : [Function] }
+{ greet : [Function] }
+```
+
+By doing this the reference is still
+
+ 
+ 
 
 
 
