@@ -572,7 +572,7 @@ Hello world!!!!          greet5.js:4
 
 **Note that** pattern3 does not re run its module event code even though we call it multiple times,it **caches** the output and use that
 
-----------------------------------------------------------------------------------------------------------------------------------------
+
 
 <h2>modules.exports vs exports</h2>
 
@@ -647,6 +647,14 @@ we will get
 ```
 
 By doing this the reference is not broken
+
+________________________________________________________________________________________________________________________________________
+
+# Event emitter
+
+**Event** : Something that has happened in our app that we can respond to.
+
+Node.js core API is based on asynchronous event-driven architecture in which certain kind of objects called emitters periodically emit events that cause listener objects to be called.**[** official defination on nodeJS site :)**]**
 
  
  
