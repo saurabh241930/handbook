@@ -373,6 +373,34 @@ var greet = require("./greet.js")
 greet()
 
 ```
+so what really node do to make **require** work
+
+if you look deep into nodejs source code here's what really when happens
+
+**first it wraps our code**
+
+```javascript
+(function(exports , require, module, _filename,_dirname){
+var greet = function(){
+console.log("hello world")
+}
+
+module.exports = greet;
+
+});
+
+```
+
+**then it invoke the function* and make require & module function available*
+
+```javascript
+fn(module.exports,require,module,filename,dirname)
+
+//then it returns 
+
+return module.exports
+```
+
 
 
 
