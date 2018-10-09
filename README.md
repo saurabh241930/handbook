@@ -570,6 +570,8 @@ Hello world!!!!          greet5.js:4
  
 ```
 
+**Note that** pattern3 does not re run its module event code even though we call it multiple times,it **caches** the output and use that
+
 
 
 
