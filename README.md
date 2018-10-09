@@ -401,6 +401,10 @@ fn(module.exports,require,module,filename,dirname)
 return module.exports
 ```
 
+initially **exports** is a empty object ,we overide with help of *require*
+
+
+
 <h2>Nested require</h2>
 
 Now instead of creating a greet file we will create directory *greet* and put 3 files
@@ -457,6 +461,117 @@ engilsh.greet()
 spanish.greet()
 
 ```
+
+
+
+<h2>Modules Pattern</h2>
+
+
+**PATTERN 1**
+
+```javascript
+
+module.exports.greet = function() {
+ console.log("hello world")
+ }
+ 
+```
+
+**PATTERN 2**
+
+```javascript
+module.exports = function() {
+	console.log('Hello world');
+};
+```
+
+
+
+**PATTERN 3**
+
+```javascript
+function Greetr() {
+	this.greeting = 'Hello world!!';
+	this.greet = function() {
+		console.log(this.greeting);
+	}
+}
+
+module.exports = new Greetr();
+
+```
+
+**PATTERN 4**
+
+```javascript
+function Greetr() {
+	this.greeting = 'Hello world!!!';
+	this.greet = function() {
+		console.log(this.greeting);
+	}
+}
+
+module.exports = Greetr;
+
+```
+
+
+**PATTERN 5**
+
+```javascript
+var greeting = 'Hello world!!!!';
+
+function greet() {
+	console.log(greeting);
+}
+
+module.exports = {
+	greet: greet
+}
+
+```
+
+usage in app.js file
+
+```javascript
+
+var greet = require('./greet1');
+greet();
+
+var greet2 = require('./greet2').greet;
+greet2();
+
+var greet3 = require('./greet3');
+greet3.greet();
+greet3.greeting = 'Changed hello world!';
+
+var greet3b = require('./greet3');
+greet3b.greet();
+
+var Greet4 = require('./greet4');
+var grtr = new Greet4();
+grtr.greet();
+
+var greet5 = require('./greet5').greet;
+greet5();
+
+```
+
+when we run this in console
+
+```
+
+Hello world              greet1.js:2
+Hello world!             greet2.js:2
+Hello world!!            greet3.js:4
+Changed hello world!     greet3.js:4
+Hello world!!!           greet4.js:4
+Hello world!!!!          greet5.js:4
+ 
+```
+
+
+
 
 
 
