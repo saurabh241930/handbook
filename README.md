@@ -646,7 +646,7 @@ we will get
 { greet : [Function] }
 ```
 
-By doing this the reference is still
+By doing this the reference is not broken
 
  
  
