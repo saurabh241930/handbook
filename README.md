@@ -391,7 +391,7 @@ module.exports = greet;
 
 ```
 
-**then it invoke the function* and make require & module function available*
+**then it invoke the function* and make require & module function available**
 
 ```javascript
 fn(module.exports,require,module,filename,dirname)
@@ -400,6 +400,56 @@ fn(module.exports,require,module,filename,dirname)
 
 return module.exports
 ```
+
+<h2>Nested require</h2>
+
+Now instead of creating a greet file we will create directory *greet* and put 3 files
+
+```
+|--greet
+  |--english.js
+  |--index.js
+  |--spanish.js
+```
+
+now when we write `javascript require("greet")` it will look inside greet folder and then **index.js** file
+
+suppose in **english.js**
+
+```javascript
+var greet = function(){
+console.log("hello world")
+}
+
+module.exports = greet;
+```
+and in **spanish.js**
+
+```javascript
+var greet = function(){
+console.log("hola!")
+}
+
+module.exports = greet;
+```
+
+to put both files we have to require both in **index.js**
+
+```javascript
+
+var english = require("./english")
+var spanish = require("./spanish")
+
+module.exports = {
+
+     english:english,
+     spanish:spanish
+     
+     }
+     
+     ```
+
+
 
 
 
