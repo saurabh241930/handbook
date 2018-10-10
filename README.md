@@ -931,6 +931,12 @@ two streams are connect by **pipe** .eg. In node you pipe from **Readable** stre
 
 <img src="https://i.imgur.com/7brXE7d.png" />
 
+----------------------------------------------------------------------------------------------------------------------------------------
+
+# TCP & IP
+
+<img src = "https://i.imgur.com/lEEZtLo.png"/>
+
 
 
 
