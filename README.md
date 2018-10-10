@@ -876,7 +876,7 @@ In Node.js, there are five types of **streams** −
 
 
 <h3>fs</h3>
-nodejs **fs** is used to read file
+nodejs  **fs**  is used to read file
 
 ```
 |--app.js
@@ -900,6 +900,34 @@ console.log('Done!');
 ```
 
 here **readFileSync** is sychronous we can make it **asychronous** by passing callback
+
+Now let's use **fs** to copy data from one file to one another
+
+suppose we have a file of name **someText.txt**  contains
+
+```
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris sodales iaculis diam. Phasellus ac pellentesque velit, sed pellentesque nulla. Vestibulum molestie facilisis diam et viverra. Cras aliquet maximus dui, vel porttitor velit fermentum et. Maecenas non ante eu ante mollis lacinia. Suspendisse molestie felis vitae est sollicitudin accumsan. Pellentesque maximus maximus lacus at fermentum. Sed mollis, velit vitae pellentesque porttitor, nibh lectus feugiat augue, aliquam dignissim nibh enim quis augue. Curabitur vel leo id erat consequat egestas. Aliquam erat volutpat..........about 10000 words
+
+```
+now to we have to copy this file into **someTextCopy.txt**  but we also have to keep in mind that it does have large amount of data , so we have to minimize the memory consumption
+
+So,rather than sending all data in big **buffer** file we can break into samll **chunks**
+
+```javascript
+var fs = require('fs');
+
+var readable = fs.createReadStream(__dirname + '/greet.txt', { encoding: 'utf8', highWaterMark: 16 * 1024 });
+//breaking each buffer from 64kb to 16kb
+
+var writable = fs.createWriteStream(__dirname + '/greetcopy.txt');
+
+readable.on('data', function(chunk) {
+	console.log(chunk);
+	writable.write(chunk);
+});
+```
+
+
 
 
 
