@@ -433,6 +433,13 @@ greeter1.greet('Tony');
 
 ```
 
+<h2>SYNCHRONOUS vs ASYNCHRONOUS</h2>
+
+**synchronous** : Running a only process at a time
+**asynchronous** : Running a multiple process at a time
+
+*asynchronous* is one of the major reason why **NODE** exist , but note that **Javascript** and **V8** both are ***synchronous*** in nature ,since **NodeJS** is running both ats same time , thats what make it **asynchronous**
+
 
 
 
