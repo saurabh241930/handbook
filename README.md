@@ -25,7 +25,7 @@ Imagine visiting Facebook and you were told to wait for 5 minutes, for thousands
 
 Threads are a way for systems to run multiple operations concurrently. So every request would open a new thread, every thread had all it required to run the same code to completion.
 
-If it sounds strange?. Let’s use this analogy.
+If it sounds strange?. Let’s use this analogy. 
 
 
 
