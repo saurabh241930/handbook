@@ -335,7 +335,7 @@ will overide **person1** with *Oslo* and *Norway*
 
 usage of **call(this)** 
 
-```javascrript
+```javascript
 var util = require('util');
 
 function Person() {
@@ -366,7 +366,7 @@ firstname & lastname are defined because **util.js** just connected prototypes n
 
 to solve this we can add
 
-```javascrript
+```javascript
 function Policeman() {
         Person.call(this);
 	this.badgenumber = '1234';
@@ -374,6 +374,42 @@ function Policeman() {
 ```
 
 here **call(this)** will work as a super constructor and it will run **Person** constructor
+
+<h3> ES6 - class :</h3>
+
+Class Inheritance. ES6 supports the concept of Inheritance. ... A class inherits from another class using the 'extends' keyword. Child classes inherit all properties and methods except constructors from the parent class.
+
+```javascript
+'use strict';
+
+class Person {
+	constructor(firstname, lastname) {
+		this.firstname = firstname;
+		this.lastname = lastname;
+	}
+	
+	greet() {
+		console.log('Hello, ' + this.firstname + ' ' + this.lastname);
+	}
+}
+
+
+// which is basically same as 
+
+
+function Person() {
+	this.firstname = 'John';
+	this.lastname = 'Doe';
+}
+
+Person.prototype.greet = function() {
+	console.log('Hello ' + this.firstname + ' ' + this.lastname);
+}
+
+```
+But note that js **class** is just a **syntactic sugar** ,it is not similar classes in **java,C#** or other language
+
+
 
 
 
