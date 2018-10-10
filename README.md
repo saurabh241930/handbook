@@ -316,7 +316,64 @@ console.log(e);
 
 ```
 
+<h3>Overiding with call() : </h3>
 
+```javascript
+var person = {
+    fullName: function(city, country) {
+        return this.firstName + " " + this.lastName + "," + city + "," + country;
+    }
+}
+var person1 = {
+    firstName:"John",
+    lastName: "Doe",
+}
+person.fullName.call(person1, "Oslo", "Norway");
+```
+
+will overide **person1** with *Oslo* and *Norway*
+
+usage of **call(this)** 
+
+```javascrript
+var util = require('util');
+
+function Person() {
+	this.firstname = 'John';
+	this.lastname = 'Doe';
+}
+
+Person.prototype.greet = function() {
+	console.log('Hello ' + this.firstname + ' ' + this.lastname);
+}
+
+function Policeman() {
+	this.badgenumber = '1234';
+}
+
+util.inherits(Policeman, Person);  //inherit all method from Policeman
+var officer = new Policeman();
+officer.greet();
+```
+
+when we run this
+
+```
+Hello undefined undefined
+```
+
+firstname & lastname are defined because **util.js** just connected prototypes not the property directly attached to object
+
+to solve this we can add
+
+```javascrript
+function Policeman() {
+        Person.call(this);
+	this.badgenumber = '1234';
+}
+```
+
+here **call(this)** will work as a super constructor and it will run **Person** constructor
 
 
 
