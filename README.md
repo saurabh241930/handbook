@@ -436,9 +436,10 @@ greeter1.greet('Tony');
 <h2>SYNCHRONOUS vs ASYNCHRONOUS</h2>
 
 **synchronous** : Running a only process at a time
+
 **asynchronous** : Running a multiple process at a time
 
-*asynchronous* is one of the major reason why **NODE** exist , but note that **Javascript** and **V8** both are ***synchronous*** in nature ,since **NodeJS** is running both ats same time , thats what make it **asynchronous**
+*asynchronous* is one of the major reason why **NODE** exist , but note that **Javascript** and **V8** both are ***synchronous*** in nature ,since **NodeJS** is running both at same time , thats what make it **asynchronous**
 
 
 
@@ -835,6 +836,19 @@ A greeting occurred!
 
 In a **nutshell** think of **on** a event a event which is responsible to create a TODO list of event of name greet and **emit** is responsible to excecute each event in that TODO list
 
+----------------------------------------------------------------------------------------------------------------------------------------
+
+# libuv The Event loop & Non-Blocking asynchronous excecution
+
+<img src="https://i.imgur.com/djsZCUb.png"/>
+
+until now we have seen custom events(**event emitter**) now we will explore its cause i.e **system events** which is handled by library **libuv** .
+
+**LIBUV** is library written to deal with things specifically lower level to **V8** and connect to our request
+
+**`libuv`** -------REQUEST---------> **OS**
+
+*libuv* internally have **queue** of events that have completed this happens simultaneously while **V8** is running and inside libuv there's most imp component exist **event loop** thats a loop which libuv constantly checks events in *queue*
 
 
  
