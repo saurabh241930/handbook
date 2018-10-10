@@ -927,6 +927,12 @@ readable.on('data', function(chunk) {
 });
 ```
 
+two streams are connect by **pipe** .eg. In node you pipe from **Readable** stream to **Writable** stream
+
+<img src="https://i.imgur.com/7brXE7d.png" />
+
+
+
 
 
 
