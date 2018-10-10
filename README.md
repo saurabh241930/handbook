@@ -856,6 +856,32 @@ this is **non-blocking** cycle visually
 
 **NON-BLOCKING** : *Doing other things without stopping your program from running*
 
+<h3>fs</h3>
+nodejs **fs** is used to read file
+
+```
+|--app.js
+|--greet.txt
+```
+
+to read file **greet.txt** using fs
+
+
+```javascript
+var fs = require('fs');
+
+var greet = fs.readFileSync(__dirname + '/greet.txt', 'utf8');
+console.log(greet);
+
+var greet2 = fs.readFile(__dirname + '/greet.txt', 'utf8', function(err, data) {
+	console.log(data);
+});
+
+console.log('Done!');
+```
+
+here **readFileSync** is sychronous we can make it **asychronous** by passing callback
+
 
 
 
