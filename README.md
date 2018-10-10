@@ -856,6 +856,25 @@ this is **non-blocking** cycle visually
 
 **NON-BLOCKING** : *Doing other things without stopping your program from running*
 
+<h3>streams and buffer</h3>
+
+**Streams** are objects that let you read data from a source or write data to a destination in continuous fashion. 
+
+In Node.js, there are five types of **streams** −
+
+**Readable** − Stream which is used for read operation.
+
+**Writable** − Stream which is used for write operation.
+
+**Duplex** − Stream which can be used for both read and write operation.
+
+**Transform** − A type of duplex stream where the output is computed based on input.
+
+**Passthrough** − A type of duplex stream where the output is computed based on input.
+
+*Note that* stream is built on top of **event emitter** ,hence its have acccess to all the method of that and it is **abstract** in class( we have to inherit to use it)
+
+
 <h3>fs</h3>
 nodejs **fs** is used to read file
 
