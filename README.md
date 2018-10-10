@@ -850,6 +850,10 @@ until now we have seen custom events(**event emitter**) now we will explore its 
 
 *libuv* internally have **queue** of events that have completed this happens simultaneously while **V8** is running and inside libuv there's most imp component exist **event loop** thats a loop which libuv constantly checks events in *queue*
 
+<img src="https://i.imgur.com/lx1ZVwI.png"/>
+
+
+
 
  
  
