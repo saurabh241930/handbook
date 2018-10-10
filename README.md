@@ -935,6 +935,9 @@ two streams are connect by **pipe** .eg. In node you pipe from **Readable** stre
 
 # TCP & IP
 
+TCP (Transmission Control Protocol) is a standard that defines how to establish and maintain a network conversation via which application programs can exchange data. TCP works with the Internet Protocol (IP), which defines how computers send packets of data to each other.
+
+
 <img src = "https://i.imgur.com/lEEZtLo.png"/>
 
 
