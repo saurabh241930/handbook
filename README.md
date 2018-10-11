@@ -940,8 +940,25 @@ TCP (Transmission Control Protocol) is a standard that defines how to establish 
 
 <img src = "https://i.imgur.com/lEEZtLo.png"/>
 
+# HTTP in NodeJS
 
+**HTTP** is a protocol which allows the fetching of resources, such as HTML documents. It is the foundation of any data exchange on the Web and a client-server protocol, which means requests are initiated by the recipient, usually the Web browser. A complete document is reconstructed from the different sub-documents fetched, for instance text, layout description, images, videos, scripts, and more.
 
+[Read more about HTTP here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview)
+
+```javascript
+var http = require('http');
+http.createServer(function (req, res) {
+  res.writeHead(200, {'Content-Type': 'text/html'});
+  res.write('Hello World!');
+  res.end();
+}).listen(8080,'127.0.0.1');
+```
+ now when we run this this code will succesfully sits there in **node** engine wait for **request** to emit **response**
+ 
+ best way to request is use our browser
+
+[http://localhost:8080](http://localhost:8080) will get **response** *Hello World!*
 
 
 
