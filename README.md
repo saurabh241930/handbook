@@ -988,6 +988,21 @@ http.createServer(function(req, res) {
 </html>
 ```
 
+note that this method can lead to **latency** while  outputing response when you are delivering large amount of data, instead use **pipe** to output send chunks of data  via **response** stream 
+
+```javascript
+var http = require('http');
+var fs = require('fs');
+
+http.createServer(function(req, res) {
+    
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    fs.createReadStream(__dirname + '/index.htm').pipe(res);
+    
+}).listen(1337, '127.0.0.1');
+```
+
+TODO Routing
 
 
 
