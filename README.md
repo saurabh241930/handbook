@@ -961,6 +961,34 @@ http.createServer(function (req, res) {
 [http://localhost:8080](http://localhost:8080) will get **response** *Hello World!*
 
 
+<h3>Outputing HTML and templates</h3>
+
+```javascript
+var http = require('http');
+var fs = require('fs');
+
+http.createServer(function(req, res) {
+    
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    var html = fs.readFileSync(__dirname + '/index.htm', 'utf8');
+    var message = 'Hello world...';
+    html = html.replace('{Message}', message);
+    res.end(html);
+    
+}).listen(1337, '127.0.0.1');
+
+```
+
+```html
+<html>
+	<head></head>
+	<body>
+		<h1>{Message}</h1>
+	</body>
+</html>
+```
+
+
 
 
 
