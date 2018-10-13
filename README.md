@@ -867,8 +867,16 @@ Yea your **code** executes **`one`** thing at a time even when other workers are
 consider this **eg.**
 
 ```
-Imagine a king that has thousands of other servants, the king writes a list of things he wants the servant to do (a long list), a servant takes it and delegates work to all other servants. When one is done, he takes his result to the king. The king is always busy making other lists while the servants were working, so he collects his result and gives him another work to do.
+Imagine a king that has thousands of other servants, the king writes a list of things he wants the servant to do (a long list), 
+
+a servant takes it and delegates work to all other servants. When one is done, he takes his result to the king. The king is always busy
+
+making other lists while the servants were working, so he collects his result and gives him another work to do.
+
 ```
+*The point is, the king does one thing at a time even if alot of things are running parallel. In this anology, the king is your code and the servants are NodeJs background workers. Everything is happening parallel except your code.*
+
+
 
 <img src="https://i.imgur.com/djsZCUb.png"/>
 
@@ -963,12 +971,7 @@ two streams are connect by **pipe** .eg. In node you pipe from **Readable** stre
 
 ----------------------------------------------------------------------------------------------------------------------------------------
 
-# TCP & IP
 
-TCP (Transmission Control Protocol) is a standard that defines how to establish and maintain a network conversation via which application programs can exchange data. TCP works with the Internet Protocol (IP), which defines how computers send packets of data to each other.
-
-
-<img src = "https://i.imgur.com/lEEZtLo.png"/>
 
 # HTTP in NodeJS
 
@@ -1032,13 +1035,391 @@ http.createServer(function(req, res) {
 }).listen(1337, '127.0.0.1');
 ```
 
-TODO Routing
 
+# Routing
 
+A server stores lots of files, when browsers request, they tell the server what they are looking for. The server responds accordingly by giving them files they ask for. This is called **Routing.**
 
+In NodeJs, we need to manually define our routes. It’s no big deal, here’s how to do a basic one.
 
-
+```javascript
+//server.js
+const http = require('http'),
+      url = require('url'),
  
+makeServer = function (request,response){
+   let path = url.parse(request.url).pathname;
+   console.log(path);
+   if(path === '/'){
+      response.writeHead(200,{'Content-Type':'text/plain'});
+      response.write('Hello world');
+   }
+   else if(path === '/about'){
+     response.writeHead(200,{'Content-Type':'text/plain'});
+     response.write('About page');
+   }
+   else if(path === '/blog'){
+     response.writeHead(200,{'Content-Type':'text/plain'});
+     response.write('Blog page');
+   }
+   else{
+     response.writeHead(404,{'Content-Type':'text/plain'});
+     response.write('Error page');
+   }
+   response.end();
+ },
+server = http.createServer(makeServer);
+server.listen(3000,()=>{
+ console.log('Node server created at port 3000');
+});
+
+```
+Paste this code in your **server.js** file, navigate to it, run it with node server.js head to your browser hit localhost:3000 and localhost:3000/about,. Try doing it with something like **localhost:3000/somethingelse.** Our error page right?.
+
+While this may satisfy our immediate need of starting a server, it’s crazy to do this for every web page on your server. Nobody does this actually, but it’s just to give you the idea of how things work.
+
+If you observed, we required another module; url. It provides us with an easy way to work with urls.
+
+The **`.parse()`** method takes a url as argument and breaks it into protocol , **host**, **path** and **querystringetc.** If you don’t get that part, it’s alright.
+
+Let’s take for example the url.
+
+<img src="https://cdn-images-1.medium.com/max/1000/1*W6g3mdceuhhwSrDShWW91A.png"/>
+
+So when we do **url.parse(request.url).pathname** , it gives us the pathname or the url which is primarily what we use to **route requests.** But things can get easier though.
+
+
+<h3> Routing with express </h3>
+
+If you’ve done some underground research, you must have heard about **Express.** It’s a NodeJs framework for easily building web apps and **APIs**. Since you want to write NodeJs apps, you’ll need Express too. It makes everything easier. You’ll see what I mean.
+
+```javascript
+//server.js
+const express = require('express'),
+      server = express();
+
+server.set('port', process.env.PORT || 3000);
+
+//Basic routes
+server.get('/', (request,response)=>{
+   response.send('Home page');
+});
+
+server.get('/about',(request,response)=>{
+   response.send('About page');
+});
+
+//Express error handling middleware
+server.use((request,response)=>{
+   response.type('text/plain');
+   response.status(505);
+   response.send('Error page');
+});
+
+//Binding to a port
+server.listen(3000, ()=>{
+  console.log('Express server started at port 3000');
+});
+```
+
+Now this looks clean right? I believe you might be getting tuned already. After importing the express module, we called it as a function. This begins our server journey.
+
+Next, we try to set the port with **server.set()**. **process.env.PORT** gets the environment port the app is running on and somehow, if it’s not available, we default it to 3000.
+
+If you observed the code above, routing in Express follows a pattern.
+
+**`server.VERB('route',callback);`**
+
+**VERB** here is any of the **GET, POST** etc, pathname is a string that gets appended to the domain .And the **callback** is any function we want to fire when the requests come in.
+
+There’s one more thing.
+
+**`server.use(callback);`**
+
+Whenever you see a **.use()** method in express, it’s called a **middleware.** Middlewares are functions that do some http heavy lifting for us. In the code above, the middleware is an error handling one.
+
+Finally, we do our normal *server.listen()* remember?
+
+This is what routing looks like in NodeJs applications
+
+# Building RESTful APIs with Node and Express.
+
+APIs are a way for web applications to send data to one another. Have you ever been to a site where you make use of your facebook account to sign in or sign up. Facebook gives out a part fo their functionality for other applications to use. That’s what an API looks like.
+
+A **REST**ful API is one that the server or client has no idea of the state of each other. By using a REST interface, different clients hit the same REST endpoints, perform the same actions, and receive the same responses without minding the state of each other.
+
+**An API end point is a single function in an API that returns data.**
+
+Creating a RESTful API involves sending data in JSON or XML format. Let’s try to make one in NodeJs. We’ll make one that returns dummy json data when a client requests via Ajax. It’s not a fancy API, but it’ll help us understand how things work in Node. So…
+
+```javascript
+
+//users.js
+module.exports.users = [
+ {
+  name: 'Mark',
+  age : 19,
+  occupation: 'Lawyer',
+  married : true,
+  children : ['John','Edson','ruby']
+ },
+  
+ {
+  name: 'Richard',
+  age : 27,
+  occupation: 'Pilot',
+  married : false,
+  children : ['Abel']
+ },
+  
+ {
+  name: 'Levine',
+  age : 34,
+  occupation: 'Singer',
+  married : false,
+  children : ['John','Promise']
+ },
+  
+ {
+  name: 'Endurance',
+  age : 45,
+  occupation: 'Business man',
+  married : true,
+  children : ['Mary']
+ },
+]
+```
+This is the data we want to share to other applications. We export it so every program can easily make use of it. That’s the idea. We store the users array in the **modules.exports** object.
+
+```javascript
+
+//server.js
+const express = require('express'),
+      server = express(),
+      users = require('./users');
+
+//setting the port.
+server.set('port', process.env.PORT || 3000);
+
+//Adding routes
+server.get('/',(request,response)=>{
+ response.sendFile(__dirname + '/index.html');
+});
+
+server.get('/users',(request,response)=>{
+ response.json(users);
+});
+
+//Binding to localhost://3000
+server.listen(3000,()=>{
+ console.log('Express server started at port 3000');
+});
+```
+Here, we require('express) and create our server with express(). If you watch closely, you’ll also see that we’re requiring something else. That’s our **users.js**, remember we stored the data we’re sharing? We need it for the program to work.
+
+Express has some methods that help us send certain content to the browser. response.sendFile() searches for a file and sends it to the browser. Here, we use a __dirname to get the root folder where our server is running from, then we add + 'index.js' to make sure we target the right file.
+
+The **response.json()** sends json content to requesting websites. We pass it an argument, users array which is what we’re actually sharing. The rest should look familiar to you I guess.
+
+```html
+//index.html
+
+<!DOCTYPE html>
+<html>
+<head>
+ <meta charset="utf-8">
+ <title>Home page</title>
+</head>
+<body>
+ <button>Get data</button>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+ 
+  <script type="text/javascript">
+  
+    const btn = document.querySelector('button');
+    btn.addEventListener('click',getData);
+    function getData(e){
+        $.ajax({
+        url : '/users',
+        method : 'GET',
+        success : function(data){
+           console.log(data);
+        },
+      
+        error: function(err){
+          console.log('Failed');
+        }
+   });
+  } 
+ </script>
+</body>
+</html>
+```
+
+
+Right in the root folder, Hit **node server.js**. Now, open your browser. Hit localhost:3000, press the button and open your browser console.
+
+<img src = "https://cdn-images-1.medium.com/max/1000/1*pNPba0k7HMSminNUlRDgrQ.gif"/>
+ 
+ 
+ btn.addEventListent('click',getData); The getData makes a ‘GET’ ajax request. It contains a **$.ajax({properties})** function that sets certain parameters likeurl, success and error etc.
+
+In real world systems, you won’t just be reading JSON files. You would want to Create, Read, Update and Delete data. Express allows these these through htttp verbs. **POST, GET, PUT and Delete** respectively.
+
+# Networking with NodeJs sockets.
+
+A computer network is a connection of computers to share and receive information. To do networking in NodeJs, we require the **net** module.
+
+`javascript const net = require('net'); `
+
+In **Transmission Control Protocol (TCP)** , there must be two endpoints; one endpoint(computer) binds to a numbered port while the other connects to the port.
+
+If you don’t understand it, take this analogy.
+
+```
+Imagine your cell phone. Once you buy a sim, you get assigned a number 
+
+and you bind to that number. When your friends want to call you, they 
+
+connect to your number. You are one endpoint and your caller is another.
+```
+
+<h3>TCP & IP </h3>
+
+TCP (Transmission Control Protocol) is a standard that defines how to establish and maintain a network conversation via which application programs can exchange data. TCP works with the Internet Protocol (IP), which defines how computers send packets of data to each other.
+
+
+<img src = "https://i.imgur.com/lEEZtLo.png"/>
+
+To cement this knowledge, we’re going to make a program that watches a file and informs connected clients when the file changes. Let’s dive right in.
+
+Create a folder, call it **/node-network** .
+Create three files, **filewatcher.js** , **subject.txt** , and **client.js**. Put this into **filewatcher.js** .
+
+```javascript
+
+
+//filewatcher.js
+
+const net = require('net'),
+   fs = require('fs'),
+   filename = process.argv[2],
+      
+server = net.createServer((connection)=>{
+ console.log('Subscriber connected');
+ connection.write(`watching ${filename} for changes`);
+  
+let watcher = fs.watch(filename,(err,data)=>{
+  connection.write(`${filename} has changed`);
+ });
+  
+connection.on('close',()=>{
+  console.log('Subscriber disconnected');
+  watcher.close();
+ });
+  
+});
+server.listen(3000,()=>console.log('listening for subscribers'));
+```
+
+ Next we should provide a file to watch. Put this into **subject.txt** and be sure to save.
+ 
+ `Hello world, I'm gonna change`
+ 
+  Next, lets create our client. Put this into **client.js**
+  
+  ```javascript
+  const net = require('net');
+let client = net.connect({port:3000});
+client.on('data',(data)=>{
+ console.log(data.toString());
+});.
+```
+
+We’ll need two terminals. In the first one, we run the **filename.js** with the name of the file to watch like so.
+
+```
+//the subject.txt will get stored in our filename variable
+
+node filewatcher.js subject.txt
+
+//listening for subscribers
+```
+
+On the other terminal, we’ll run **client.js** .
+
+```
+node client.js
+
+//watching subject.txt for file changes.
+```
+
+Now go ahead and change subject.txt . Make sure to save the changes. Take a look at the client.js terminal and notice the additional line.
+
+`//subject.txt has changed.`
+
+One major characteristics of a network is that many clients can connect at the same time. Start up another command line, navigate to client.js run node client.js and change the subject.txt file again (don’t forget to save).
+
+**What are we doing?**
+
+Don’t worry if you don’t understand, let’s go over it together.
+
+Our **filewatcher.js** basically does three things
+
+creates a server to send messages to many clients. **net.createServer()**
+Tell the server that a client connected, also tells the client that there’s a file being watched. console.log() and connection.write() .
+Finally watches the file with thewatcher variable and closes it when the client disconnects. Here’s **filewatcher.js** again.
+
+
+```javascript
+
+//filewatcher.js
+
+const net = require('net'),
+   fs = require('fs'),
+   filename = process.argv[2],
+      
+server = net.createServer((connection)=>{
+ console.log('Subscriber connected');
+ connection.write(`watching ${filename} for changes`);
+  
+let watcher = fs.watch(filename,(err,data)=>{
+  connection.write(`${filename} has changed`);
+ });
+  
+connection.on('close',()=>{
+  console.log('Subscriber disconnected');
+  watcher.close();
+ });
+  
+});
+server.listen(3000,()=>console.log('listening for subscribers'));
+```
+
+We require two modules, **fs** and **net** for reading and writing files and doing network connections relatively. If you watch closely, you’ll notice the **process.argv[2]** , **process** is a global variable that provides vital information about the **NodeJs** code running. **argv[]** is an array of arguments. When we say **argv[2]** , we refer to the third argument used to run the NodeJs code. In the command line, we would enter the name of the file we want to watch as third argument **argv[2]** . Remember this?
+
+`node filewatcher.js subject.txt`
+
+We also have something pretty familiar; the **net.createServer()** this function fires whenever a *client connects to the port*, it accepts a **callback*. The callback takes only one parameter which is the object that communicates to connecting clients.
+
+The **connection.write()** method sends data to any client connecting to the port 3000. In this case, our connection object. In this case, we tell the client that a file is being **watched.**
+
+The watcher contains a function that sends information to the client that the watched file has changed. And when the client closes the connection by exiting the **process**, the onclose event fires and the event handler passes message to the server and closes the **watcher.**
+
+```javascript
+//client.js
+const net = require('net'),
+      client = net.connect({port:3000});
+client.on('data',(data)=>{
+  console.log(data.toString());
+});
+```
+
+**client.js** is pretty straightforward, we require the net module and connect it to port 3000. We then listen for the data event and logs it to the console.
+
+You should understand that whenever our filewatcher.js does a **connection.write()** , our client gets a *data* event.
+
+This is just a scratch of the surface of how networks work. Primarily, one endpoint broadcasts messages when certain events occur and every client connected receives it as a data event.
  
 
 
