@@ -840,6 +840,36 @@ In a **nutshell** think of **on** a event a event which is responsible to create
 
 # libuv The Event loop & Non-Blocking asynchronous excecution
 
+Imagine we have this multi-threaded server (running Ruby on rails) that reads a file saved on the server and sends it to the requesting browser. It’s important to understand that Ruby won’t read the file for us directly. Ruby will tell the file system to read the file and return the contents . The file system is a program used to store and retrieve data on a computer.
+
+The point is, Ruby just sits there doing nothing till the file system is done. And then Ruby collects the content and sends the contents to the browser.
+
+Here’s where NodeJs comes in. In Node, while the file system is reading the file, Node uses the idle time to handle other requests. When the file system is done, it’s smart enough to tell Node to come take the resource and send to the browser. This is possible because of Node’s **event loop**
+
+The **event loop** is basically a program that waits for events and dispatches them when they happens. One other important fact you might know is that **JavaScript is single thread and so is Node.**
+
+Unlike other languages that require a **new thread** or process for every *single request*, **NodeJs** takes all requests and then delegates most of the work to other system workers. There’s something called a **Libuv** library which handles this work effectively with help from the OS kernel. When the background workers are done doing their work, they emit events to NodeJs **callbacks** registered on that event.
+
+This brings us to **callbacks**. *They are basically functions passed into other functions as arguments and are called when certain conditions occur.*
+
+So what NodeJs developers basically do is write **event handlers** that get called when certain Node events happen.
+
+NodeJs is extreamly faster than mullti-threaded systems. Yea even with a single thread.
+
+This is because programs usually don’t only consist of numeric, arithmetic and logic computations that take much time. In fact, a lot of times they merely write something to the file system, do network requests or access peripheries such as the console or an external device. Node excels in situations like this. When it experiences them, it quickly delegates the work to someone else and tackles other incoming **requests.**
+
+If you’ve been following along strictly, you might also have speculated that NodeJs doesn’t excel at operations that consume CPU. *CPU intensive operations overload the main thread (Only thread). When using single threaded systems, it’s ideal to avoid such operations so the main thread can do other things.*
+
+**It’s also important to know that everything in JavaScript runs parallel except your code.** 
+
+Yea your **code** executes **`one`** thing at a time even when other workers are doing their jobs **concurrently.**
+
+consider this **eg.**
+
+```
+Imagine a king that has thousands of other servants, the king writes a list of things he wants the servant to do (a long list), a servant takes it and delegates work to all other servants. When one is done, he takes his result to the king. The king is always busy making other lists while the servants were working, so he collects his result and gives him another work to do.
+```
+
 <img src="https://i.imgur.com/djsZCUb.png"/>
 
 until now we have seen custom events(**event emitter**) now we will explore its cause i.e **system events** which is handled by library **libuv** .
