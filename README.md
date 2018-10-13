@@ -884,7 +884,9 @@ making other lists while the servants were working, so he collects his result an
 ```
 *The point is, the king does one thing at a time even if alot of things are running parallel. In this anology, the king is your code and the servants are NodeJs background workers. Everything is happening parallel except your code.*
 
+Node.js is a **single threaded** language which in background uses **multiple threads** to execute **asynchronous** code.
 
+Node.js is non-blocking which means that all functions ( callbacks ) are delegated to the event loop and they are ( or can be ) executed by different threads. That is handled by Node.js **run-time**.
 
 <img src="https://i.imgur.com/djsZCUb.png"/>
 
