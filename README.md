@@ -858,7 +858,15 @@ NodeJs is extreamly faster than mullti-threaded systems. Yea even with a single 
 
 This is because programs usually don’t only consist of numeric, arithmetic and logic computations that take much time. In fact, a lot of times they merely write something to the file system, do network requests or access peripheries such as the console or an external device. Node excels in situations like this. When it experiences them, it quickly delegates the work to someone else and tackles other incoming **requests.**
 
+
+
+
+
 If you’ve been following along strictly, you might also have speculated that NodeJs doesn’t excel at operations that consume CPU. *CPU intensive operations overload the main thread (Only thread). When using single threaded systems, it’s ideal to avoid such operations so the main thread can do other things.*
+
+
+<img src="https://cdn-images-1.medium.com/max/2000/1*evOcy9n3vslkDt0Mj8mBYw.jpeg"/>
+
 
 **It’s also important to know that everything in JavaScript runs parallel except your code.** 
 
