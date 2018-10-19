@@ -25,7 +25,7 @@ MongoDB 4.0 added support for multi-document transactions, making it the only op
 Many concepts in MySQL have close analogs in MongoDB. The table below outlines the common concepts across MySQL and MongoDB.
 
 MySQL               |MongoDB
--------------------- -------------------
+|-------------------| -----------------|
 |ACID Transactions  |	ACID Transactions|
 |Table	            |Collection|
 |Row	              |Document|
@@ -33,7 +33,6 @@ MySQL               |MongoDB
 |Secondary Index    |	Secondary Index|
 |JOINs              |	Embedded documents, $lookup & $graphLookup|
 |GROUP_BY           |	Aggregation Pipeline|
-|-------------------|---------------------|
 
 
 
