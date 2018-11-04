@@ -1431,6 +1431,187 @@ You should understand that whenever our filewatcher.js does a **connection.write
 
 This is just a scratch of the surface of how networks work. Primarily, one endpoint broadcasts messages when certain events occur and every client connected receives it as a data event.
  
+# `Refreshment`
+
+exploring more **nodejs** in practical way
+
+<h2>How Node Applications Work</h2>
+
+Node.js couples JavaScript with an event loop for quickly dispatching operations
+when events occur. Many JavaScript environments use an event loop,
+but it is a core feature of Node.js.
+Node’s philosophy is to give you low-level access to the event loop and to
+system resources. Or, in the words of core committer Felix Geisendörfer, in
+Node “everything runs in parallel except your code.”
+
+If this seems a little backwards to you, don’t worry. The following figure shows
+how the event loop works
+
+
+<img src = "https://i.imgur.com/RpeH0SO.png"/>
+
+As long as there’s something left to do, **Node’s event** loop will keep spinning.
+Whenever an event occurs, Node invokes any **callbacks (event handlers)** that
+are listening for that event.
+
+As a Node developer, your job is to create the callback functions that get
+executed in response to events. Any number of callbacks can respond to any
+event, but only one **callback** function will ever be executing at any time.
+Everything else your program might do—like waiting for data from a file or
+an incoming HTTP request—is handled by Node, in parallel, behind the scenes.
+Your application code will never be executed at the same time as anything
+else. It will always have the full attention of Node’s JavaScript engine while
+it’s running.
+
+# Single-Threaded and Highly Parallel
+
+Other systems try to gain parallelism by running lots of code at the same
+time, typically by spawning many threads. But not Node.js. For JavaScript,
+Node is a single-threaded environment. At most, only one line of your code
+will ever be executing at any time.
+
+Node gets away with this by doing most I/O tasks using **nonblocking**
+techniques. Rather than waiting line-by-line for an operation to finish, you
+create a callback function that will be invoked when the operation eventually
+succeeds or fails.
+Your code should do what it needs to do, then quickly hand control back over
+to the event loop so Node can work on something else. 
+
+If it seems strange to you that Node achieves parallelism by running only one
+piece of code at a time, that’s because it is. It’s an example of something I call
+a **backwardism.**
+
+<h3>Backwardisms in Node.js</h3>
+
+A backwardism is a concept that’s so bizarre that at first it seems completely
+backwards. You’ve probably experienced many backwardisms while learning
+to program, whether you noticed them or not.
+Take the concept of a variable. In algebra it’s common to see equations like
+“7x + 3 = 24.” Here, x is called a variable; it has exactly one value, and your job
+is to figure out what that value is.
+
+Then when you start learning how to program, you quickly run into statements
+like “x = x + 7.” Now x is still called a variable, but it can have any value that
+you assign to it. It can even have different values at different times.
+From algebra’s perspective, this is a backwardism. The equation “x = x + 7”
+makes no sense at all. The notion of a variable in programming is not just a
+little different—it’s 100 percent backwards. But once you understand the
+concept of assignment, the programming variable makes perfect sense.
+So it is with Node’s single-threaded event loop. From a multithreaded perspective,
+running just one piece of code at a time seems silly. But once you
+understand event-driven programming—with nonblocking APIs—it becomes
+clear.
+
+Programming is chock-full of backwardisms like these, and Node.js is no
+exception. Starting out, you’ll frequently run into code that looks like it should
+work one way, but it actually does something quite different.
+That’s OK! With this book, you’ll learn Node by making compact programs
+that interact in useful ways. As we run into more of Node’s backwardisms,
+we’ll dive in and explore them.
+
+
+## Wrangling the File System
+
+<h3>Programming for the Node.js Event Loop</h3>
+
+Let’s get started by developing a couple of simple programs that watch files
+for changes and read arguments from the command line. Even though they’re
+short, these applications offer insights into Node’s event-based architecture.
+
+## Watching a File for Changes
+
+Watching files for changes is a convenient problem to start with because it
+demands asynchronous coding while demonstrating important Node concepts.
+Taking action whenever a file changes is just plain useful in a number of
+cases, ranging from automated deployments to running unit tests.
+
+Open a terminal to begin. On the command line, navigate to an empty directory.
+You’ll use this directory for all of the code examples in this chapter.
+Once there, use the touch command to create a file called target.txt.
+
+```terminal
+$ touch target.txt
+```
+```javascript
+file-system/watcher.js
+
+const fs = require('fs');
+fs.watch('target.txt', function() {
+console.log("File 'target.txt' just changed!");
+});
+console.log("Now watching target.txt for changes...");
+```
+
+Save this file as watcher.js in the same directory as target.txt. Let’s see how this
+program works.
+
+First, notice the const keyword at the top. This JavaScriptism (part of
+ECMAScript Harmony) sets up a variable with a constant value. The **require()**
+function pulls in a Node module and returns it. 
+
+In our case, we’re callingrequire('fs') to incorporate Node’s built-in file-system module.1
+In Node.js, a module is a self-contained bit of JavaScript that provides functionality
+to be used elsewhere. The output of require() is usually a plain old
+JavaScript object. There’s nothing particularly special about it, aside from
+the functionality provided by the module.
+Node’s module implementation is based on the CommonJS module specification.2
+ Modules can depend on other modules, much like libraries in other
+ 
+ programming environments, which import or #include other libraries.
+ 
+Next we call the fs module’s watch() method, which polls the target file for
+changes and invokes the supplied callback function whenever it does.
+In JavaScript, functions are first-class citizens. This means they can be
+assigned to variables and passed as parameters to other functions. Our callback
+function is an anonymous function; it doesn’t have a name.
+The callback function calls console.log() to echo a message to standard output
+whenever the file changes. Let’s try it out.
+Return to the command line and launch the watcher program using node, like so:
+
+```
+$ node --harmony watcher.js
+Now watching target.txt for changes...
+```
+The --harmony parameter tells Node to use the latest ECMAScript Harmony
+features available. ECMAScript Harmony is the code name for the next version
+of ECMAScript, the standard behind the JavaScript language. Not all Harmony
+features are ready for prime time, but the ones we’ll use in this book are OK
+(except where noted).
+After the program starts, Node will patiently wait until the target file is
+changed. To trigger a change, open another terminal to the same directory
+and touch the file again:
+
+` touch target.txt`
+
+The terminal running watcher.js will output the string File ’target.txt’ just
+changed!, and then the program will go back to waiting.
+
+## Visualizing the Event Loop
+The program we wrote in the last section is a good example of the Node event
+loop at work. Our simple file-watcher program causes Node to go through each
+of these steps, one by one.
+
+**To run the program, Node does the following.**
+1. It loads the script, running all the way through to the last line, which
+produces the Now watching message in the console.
+
+2. It sees that there’s more to do, because of the call to watch().
+
+3. It waits for something to happen, namely for the fs module to observe a
+change to the file.
+
+4. It executes our callback function when the change is detected.
+
+5. It determines that the program still has not finished, and resumes waiting.
+
+Node.js programs go through these steps, then the event loop spins until
+either there’s nothing left to do or the program exits by some other means.
+For example, if an exception is thrown and not caught, the process will exit.
+We’ll see how this works next.
+
+
+
+
 
 
 
