@@ -1609,6 +1609,143 @@ either there’s nothing left to do or the program exits by some other means.
 For example, if an exception is thrown and not caught, the process will exit.
 We’ll see how this works next.
 
+## Reading Command-Line Arguments
+Now let’s make our program more useful by taking in the file to watch as a
+command-line argument. This will introduce the process global object and how
+Node deals with exceptions.
+Open your editor and enter this:
+
+```javascript
+file-system/watcher-argv.js
+
+const fs = require('fs'),
+filename = process.argv[2];
+if (!filename) {
+throw Error("A file to watch must be specified!");
+}
+fs.watch(filename, function() {
+console.log("File " + filename + " just changed!");
+});
+console.log("Now watching " + filename + " for changes...");
+```
+Save the file as watcher-argv.js. You can run it like so (note the target.txt argument
+at the end):
+
+```
+$ node --harmony watcher-argv.js target.txt
+Now watching target.txt for changes...
+```
+
+You should see the same output and behavior as the first watcher.js program.
+After outputting Now watching target.txt for changes... the script will diligently
+wait for changes to the target file.
+This program uses **process.argv** to access the incoming command-line arguments.
+**`argv stands for argument vector;`** it’s an **array** containing node and the full path
+to the watcher-argv.js as its first two elements. The third element (that is, at
+index  is target.txt, the name of our target file.
+Notice that if a target file name is not provided the program will throw an
+exception. You can try that by simply omitting the target.txt parameter:
+
+```
+$ node --harmony watcher-argv.js
+/full/path/to/script/watcher-argv.js:7
+throw Error("A file to watch must be specified!");
+^
+Error: A file to watch must be specified!
+```
+Any unhandled exception thrown in Node will halt the process. The exception
+output shows the offending file, and the line number and position of the
+exception.
+Processes are important in Node. It’s pretty common in Node development to
+spawn separate processes as a way of breaking up work, rather than putting
+everything into one big Node program. In the next section, you’ll learn how
+to spawn a process in Node.
+
+## Spawning a Child Process
+Let’s enhance our file-watching example program even further by having it
+spawn a child process in response to a change. To do this, we’ll bring in Node’s
+child-process module and dive into some Node patterns and classes. You’ll also
+learn how to use streams to pipe data around.
+To keep things simple, we’ll make our script invoke the ls command with the
+-lh options. This will give us some information about the target file whenever
+it changes. You can use the same technique to spawn other kinds of processes,
+as well.
+Open your editor and enter this:
+
+```javascript
+file-system/watcher-spawn.js
+"use strict";
+const
+fs = require('fs'),
+spawn = require('child_process').spawn,
+filename = process.argv[2];
+if (!filename) {
+throw Error("A file to watch must be specified!");
+}
+fs.watch(filename, function() {
+let ls = spawn('ls', ['-lh', filename]);
+ls.stdout.pipe(process.stdout);
+});
+console.log("Now watching " + filename + " for changes...");
+```
+Save the file as watcher-spawn.js and run it with node as before:
+
+```
+$ node --harmony watcher-spawn.js target.txt
+Now watching target.txt for changes...
+
+```
+
+If you go to a different console and touch the target file, your Node program
+will produce something like this:
+
+`-rw-r--r-- 1 jimbo staff 0B Dec 19 22:45 target.txt-rw-r--r-- 1 jimbo staff 0B Dec 19 22:45 target.txt`
+
+The username, group, and other aspects of the file will be different from the
+preceding output, but the format should be the same.
+
+The program we just made begins with the string "use strict" at the top. Strict
+mode was introduced in ECMAScript version 5—it disables certain problematic
+JavaScript language features and makes others throw exceptions.
+
+Generally speaking, it’s a good idea to use strict mode.
+
+Strict mode is also required to use certain ECMAScript Harmony features in
+Node, such as the let keyword. Like const, let declares a variable, but a variable
+declared with let can be assigned a value more than once.
+
+Keep in mind that by using Harmony features (like let), your code will require
+the **--harmony** flag until these features become enabled by default. For example,
+const is already available without the --harmony flag, but not so for let.
+Next, notice that we added a new require() at the beginning of the program.
+Calling require('child_process') returns the child process module. We’re only
+interested in the spawn() method, so we save that to a constant with the same
+name and ignore the rest of the module.
+
+```javascript
+spawn = require('child_process').spawn,
+```
+Remember, **functions are first-class citizens in JavaScript**, so we’re free to
+assign them directly to variables like we did here.
+Next, take a look at the callback function we passed to **fs.watch()**.
+
+```javascript
+function() {
+let ls = spawn('ls', ['-lh', filename]);
+ls.stdout.pipe(process.stdout);
+}
+```
+
+The first parameter to **spawn()** is the name of the program we wish to execute;
+in our case it’s ls. The second parameter is an array of command-line arguments.
+It contains the flags and the target file name.
+The object returned by **spawn()** is a ChildProcess.
+
+ Its **stdin, stdout,** and **stderr** properties
+are **Streams** that can be used to read or write data. We want to send the
+
+
+
 
 
 
