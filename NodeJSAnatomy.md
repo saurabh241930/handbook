@@ -1744,6 +1744,165 @@ The object returned by **spawn()** is a ChildProcess.
  Its **stdin, stdout,** and **stderr** properties
 are **Streams** that can be used to read or write data. We want to send the
 
+standard output from the child process directly to our own standard output
+stream. This is what the **pipe()** method does.
+Sometimes you’ll want to capture data from a **stream**, rather than just **piping**
+it forward. Let’s see how to do that.
+
+## Capturing Data from an EventEmitter
+
+EventEmitter is a very importantIt provides a channel for events
+to be dispatched and listeners notified. 
+
+Many objects you’ll encounter in Node inherit from **EventEmitter**, like the Streams we saw in the last section.
+Now let’s modify our previous program to capture the child process’s output
+by listening for events on the stream. Open an editor to the *watcher-spawn.js* file
+from the previous section, then find the call to **fs.watch()**. Replace it with this:
+
+```javascript
+file-system/watcher-spawn-parse.js
+fs.watch(filename, function() {
+let
+ls = spawn('ls', ['-lh', filename]),
+output = '';
+ls.stdout.on('data', function(chunk){
+output += chunk.toString();
+});
+ls.on('close', function(){
+let parts = output.split(/\s+/);
+console.dir([parts[0], parts[4], parts[8]]);
+});
+});
+```
+Save this updated file as watcher-spawn-parse.js. Run it as usual, then touch the
+target file in a separate terminal. You should see output something like this:
+
+```
+$ node --harmony watcher-spawn-parse.js target.txt
+Now watching target.txt for changes...
+[ '-rw-r--r--', '0B', 'target.txt' ]
+```
+
+The new callback starts out the same as before, creating a child process and
+assigning it to a variable called ls. It also creates an output variable, which will
+buffer the output coming from the child process.
+
+Next we add event listeners. An event listener is a callback function that is
+invoked when an event of a specified type is dispatched. Since the Stream class
+inherits from EventEmitter, we can listen for events from the child process’s
+standard output stream.
+
+```javascript
+ls.stdout.on('data', function(chunk){
+output += chunk.toString();
+});
+```
+The **on()** method adds a listener for the specified event type. We listen for data
+events because we’re interested in data coming out of the stream.
+Events can send along extra information, which arrives in the form of
+parameters to the **callbacks**. Data events in particular pass along a **buffer**
+
+ Each time we get a chunk of data, we append it to our output.
+A Buffer is Node’s way of representing binary data. It points to a blob of
+memory allocated by Node’s native core, outside of the JavaScript engine.
+Buffers can’t be resized and they require encoding and decoding to convert
+to and from JavaScript strings.
+
+Calling *toString()* explicitly converts the buffer’s contents to a JavaScript string
+using Node’s default encoding (UTF-8). This means copying the content into
+Node’s heap, which can be a slow operation, relatively speaking. If you can,
+it’s better to work with buffers directly, but strings are more convenient.
+Like Stream, the **ChildProcess class extends EventEmitter**, so we can add **listeners**
+to it, as well.
+
+```javascript
+ls.on('close', function(){
+let parts = output.split(/\s+/);
+console.dir([parts[0], parts[4], parts[8]]);
+});
+```
+After a child process has exited and all its streams have been flushed, it emits
+a close event. When the callback printed here is invoked, we parse the output
+data by splitting on sequences of one or more whitespace characters (using
+the regular expression /\s+/).
+
+Finally, we use **console.dir()** to report on the first,
+fifth, and ninth fields (indexes 0, 4, and 8), which correspond to the permissions,
+size, and file name, respectively.
+We’ve seen a lot of Node’s features in this small problem space of file-watching.
+You now know how to use key Node classes, including EventEmitter, Stream,
+ChildProcess, and Buffer. You also have firsthand experience writing asynchronous
+call-back functions and coding for the event loop.
+Let’s expand on these concepts in the next phase of our file-system journey:
+reading and writing files.
+
+## Reading and Writing Files Asynchronously
+
+Earlier in this chapter, we wrote a series of Node programs that could watch
+files for changes. Now let’s explore Node’s methods for reading and writing
+files. Along the way we’ll see two common error-handling patterns in Node:
+error events on EventEmitters and err callback arguments.
+There are a few different approaches to reading and writing files in Node. The
+simplest way is to read in or write out the entire file at once. This technique
+works well for small files. Other approaches read and write by creating Streams
+or staging content in a buffer. Here’s an example of the whole-file-at-once
+approach:
+
+
+```javascript
+file-system/read-simple.js
+const fs = require('fs');
+fs.readFile('target.txt', function (err, data) {
+if (err) {
+throw err;
+}
+console.log(data.toString());
+```
+
+Save this file as read-simple.js and run it as usual with node --harmony
+
+`$ node --harmony read-simple.js`
+
+You’ll see the contents of target.txt echoed to the command line. If the file is
+empty, all you’ll see is a blank line.
+
+Notice how the first parameter to the readFile() callback handler is err. If readFile()
+is successful, then err will be false. Otherwise the err parameter will contain
+an Error object. This is a common error-reporting pattern in Node, especially
+for built-in modules. In our example’s case, we throw the error if there was
+one. Recall that an uncaught exception in Node will halt the program by
+escaping the event loop.
+
+The second parameter to our callback, data, is a buffer; the same kind that
+was passed to our various callbacks in previous sections.
+Writing a file using the whole-file approach is similar. Here’s an example:
+
+```javascript
+file-system/write-simple.js
+const fs = require('fs');
+fs.writeFile('target.txt', 'a witty message', function (err) {
+if (err) {
+throw err;
+}
+console.log("File saved!");
+});
+```
+
+This program writes “a witty message” to target.txt (creating it if it doesn’t exist,
+or overwriting it if it does). If for any reason the file couldn’t be written, then
+the err parameter will contain an Error object.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
