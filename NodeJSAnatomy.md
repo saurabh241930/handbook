@@ -1531,6 +1531,88 @@ That’s OK! With this book, you’ll learn Node by making compact programs
 that interact in useful ways. As we run into more of Node’s backwardisms,
 we’ll dive in and explore them.
 
+## Redefining Node.js Event-Driven Architecture idea
+
+Most of Node’s objects — like HTTP requests, responses, and streams — implement the EventEmitter module so they can provide a way to emit and listen to events.
+
+```javascript
+const EventEmitter = require('events')
+```
+The simplest form of the event-driven nature is the callback style of some of the popular Node.js functions — for example, fs.readFile. In this analogy, the event will be fired once (when Node is ready to call the callback) and the callback acts as the event handler.
+
+Let’s explore this basic form first.
+
+<h3>Call me when you’re ready, Node!</h3>
+
+The original way Node handled asynchronous events was with callback. This was a long time ago, before JavaScript had native promises support and the async/await feature.
+
+Callbacks are basically just functions that you pass to other functions. This is possible in JavaScript because functions are first class objects.
+
+It’s important to understand that callbacks do not indicate an asynchronous call in the code. A function can call the callback both synchronously and asynchronously.
+
+For example, here’s a host function fileSize that accepts a callback function cb and can invoke that callback function both synchronously and asynchronously based on a condition:
+
+```javascript
+function fileSize (fileName, cb) {
+  if (typeof fileName !== 'string') {
+    return cb(new TypeError('argument should be string')); // Sync
+  }
+  fs.stat(fileName, (err, stats) => {
+    if (err) { return cb(err); } // Async
+    cb(null, stats.size); // Async
+  });
+}
+```
+
+Note that this is a bad practice that leads to unexpected errors. Design host functions to consume callback either always synchronously or always asynchronously.
+
+Let’s explore a simple example of a typical asynchronous Node function that’s written with a callback style
+
+```javascript
+const readFileAsArray = function(file, cb) {
+  fs.readFile(file, function(err, data) {
+    if (err) {
+      return cb(err);
+    }
+    const lines = data.toString().trim().split('\n');
+    cb(null, lines);
+  });
+};
+```
+
+readFileAsArray takes a file path and a callback function. It reads the file content, splits it into an array of lines, and calls the callback function with that array.
+
+Here’s an example use for it. Assuming that we have the file numbers.txt in the same directory with content like this:
+
+```
+10
+
+11
+
+12
+
+13
+
+14
+
+15
+```
+
+If we have a task to count the odd numbers in that file, we can use **readFileAsArray** to simplify the code:
+
+```javascript
+readFileAsArray('./numbers.txt', (err, lines) => {
+  if (err) throw err;
+  const numbers = lines.map(Number);
+  const oddNumbers = numbers.filter(n => n%2 === 1);
+  console.log('Odd numbers count:', oddNumbers.length);
+});
+```
+
+The code reads the numbers content into an array of strings, parses them as numbers, and counts the odd ones.
+
+Node’s callback style is used purely here. The callback has an **error-first argument** err that’s nullable and we pass the callback as the last argument for the host function. You should always do that in your functions because users will probably assume that. Make the host function receive the callback as its last argument and make the callback expect an error object as its first argument.
+
 
 ## Wrangling the File System
 
@@ -1664,11 +1746,16 @@ wait for changes to the target file.
 This program uses **process.argv** to access the incoming command-line arguments.
 **`argv stands for argument vector;`** it’s an **array** containing node and the full path
 to the watcher-argv.js as its first two elements. The third element (that is, at
+
 index  is target.txt, the name of our target file.
 ( i.e 
+
 process.argv[0] == "node"
+
 process.argv[1] == "myprogram.js"
+
 process.argv[2] == "firstarg"
+
 )
 Notice that if a target file name is not provided the program will throw an
 exception. You can try that by simply omitting the target.txt parameter:
@@ -1688,7 +1775,35 @@ spawn separate processes as a way of breaking up work, rather than putting
 everything into one big Node program. In the next section, you’ll learn how
 to spawn a process in Node.
 
-## Spawning a Child Process
+
+## The Child Processes Module
+
+We can easily spin a child process using Node’s child_process module and those child processes can easily communicate with each other with a messaging system.
+
+The child_process module enables us to access Operating System functionalities by running any system command inside a, well, child process.
+
+We can control that child process input stream, and listen to its output stream. We can also control the arguments to be passed to the underlying OS command, and we can do whatever we want with that command’s output. We can, for example, pipe the output of one command as the input to another (just like we do in Linux) as all inputs and outputs of these commands can be presented to us using Node.js streams.
+
+Note that examples I’ll be using in this article are all Linux-based. On Windows, you need to switch the commands I use with their Windows alternatives.
+
+There are four different ways to create a child process in Node: spawn(), fork(), exec(), and execFile().
+
+We’re going to see the differences between these four functions and when to use each.
+
+
+### Spawning a Child Process
+
+The spawn function launches a command in a new process and we can use it to pass that command any arguments. For example, here’s code to spawn a new process that will execute the pwd command.
+
+```javascript
+const { spawn } = require('child_process');
+const child = spawn('pwd');
+```
+
+We simply destructure the spawn function out of the child_process module and execute it with the OS command as the first argument.
+
+The result of executing the spawn function (the child object above) is a ChildProcess instance, which implements the EventEmitter API. This means we can register handlers for events on this child object directly. For example, we can do something when the child process exits by registering a handler for the exit event:
+
 Let’s enhance our file-watching example program even further by having it
 spawn a child process in response to a change. To do this, we’ll bring in Node’s
 child-process module and dive into some Node patterns and classes. You’ll also
