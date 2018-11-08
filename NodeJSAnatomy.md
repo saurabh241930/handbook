@@ -3,7 +3,6 @@
 ## INDEX
 [Origin of NodeJS](https://github.com/saurabh241930/handbook/blob/master/NodeJSAnatomy.md#before-nodejs)
 [REFRESHMENT](https://github.com/saurabh241930/handbook/blob/master/NodeJSAnatomy.md#refreshment)
-<h2>JAVASCRIPT</h2>
 [First Class function](https://github.com/saurabh241930/handbook/blob/master/NodeJSAnatomy.md#first-class-function)
 [Function expression](https://github.com/saurabh241930/handbook/blob/master/NodeJSAnatomy.md#function-expression)
 [Function constructors](https://github.com/saurabh241930/handbook/blob/master/NodeJSAnatomy.md#function-constructors)
