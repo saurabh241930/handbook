@@ -1665,6 +1665,11 @@ This program uses **process.argv** to access the incoming command-line arguments
 **`argv stands for argument vector;`** it’s an **array** containing node and the full path
 to the watcher-argv.js as its first two elements. The third element (that is, at
 index  is target.txt, the name of our target file.
+( i.e 
+process.argv[0] == "node"
+process.argv[1] == "myprogram.js"
+process.argv[2] == "firstarg"
+)
 Notice that if a target file name is not provided the program will throw an
 exception. You can try that by simply omitting the target.txt parameter:
 
