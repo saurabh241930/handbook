@@ -1613,6 +1613,8 @@ The code reads the numbers content into an array of strings, parses them as numb
 
 Node’s callback style is used purely here. The callback has an **error-first argument** err that’s nullable and we pass the callback as the last argument for the host function. You should always do that in your functions because users will probably assume that. Make the host function receive the callback as its last argument and make the callback expect an error object as its first argument.
 
+<h3>The modern JavaScript alternative to Callbacks</h3>
+
 
 ## Wrangling the File System
 
