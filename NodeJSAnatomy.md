@@ -1866,6 +1866,144 @@ class WithTime extends EventEmitter {
 
 I don’t know about you, but this is much more readable to me than the callback-based code or any .then/.catch lines. The **async/await** feature brings us as close as possible to the JavaScript language itself, which I think is a big win.
 
+## Events Arguments and Errors
+
+In the previous example, there were two events that were emitted with extra arguments.
+
+The error event is emitted with an error object.
+
+```javascript
+this.emit('error', err);
+```
+The data event is emitted with a data object.
+
+```javascript
+this.emit('data', data);
+```
+We can use as many arguments as we need after the named event, and all these arguments will be available inside the listener functions we register for these named events.
+
+For example, to work with the data event, the listener function that we register will get access to the data argument that was passed to the emitted event and that data object is exactly what the **asyncFunc** exposes.
+```javascript
+withTime.on('data', (data) => {
+  // do something with data
+});
+```
+The error event is usually a special one. In our callback-based example, if we don’t handle the error event with a listener, the node process will actually exit.
+
+To demonstrate that, make another call to the execute method with a bad argument:
+
+```javascript
+class WithTime extends EventEmitter {
+  execute(asyncFunc, ...args) {
+    console.time('execute');
+    asyncFunc(...args, (err, data) => {
+      if (err) {
+        return this.emit('error', err); // Not Handled
+      }
+
+      console.timeEnd('execute');
+    });
+  }
+}
+
+
+
+withTime.execute(fs.readFile, ''); // BAD CALL
+withTime.execute(fs.readFile, __filename);
+```
+
+The first execute call above will trigger an error. The node process is going to crash and exit:
+
+```
+events.js:163
+      throw er; // Unhandled 'error' event
+      ^
+Error: ENOENT: no such file or directory, open ''
+```
+
+The second execute call will be affected by this crash and will potentially not get executed at all.
+
+If we register a listener for the special error event, the behavior of the node process will change. For example:
+
+```javascript
+withTime.on('error', (err) => {
+  // do something with err, for example log it somewhere
+  console.log(err)
+});
+```
+
+If we do the above, the error from the first execute call will be reported but the node process will not crash and exit. The other execute call will finish normally:
+
+```
+{ Error: ENOENT: no such file or directory, open '' errno: -2, code: 'ENOENT', syscall: 'open', path: '' }
+execute: 4.276ms
+```
+
+Note that Node currently behaves differently with promise-based functions and just outputs a warning, but that will eventually change:
+
+```
+UnhandledPromiseRejectionWarning: Unhandled promise rejection (rejection id: 1): Error: ENOENT: no such file or directory, open ''
+DeprecationWarning: Unhandled promise rejections are deprecated. In the future, promise rejections that are not handled will terminate the Node.js process with a non-zero exit code.
+```
+
+The other way to handle exceptions from emitted errors is to register a listener for the global uncaughtException process event. However, catching errors globally with that event is a bad idea.
+
+The standard advice about uncaughtException is to avoid using it, but if you must do (say to report what happened or do cleanups), you should just let the process exit anyway:
+
+```javascript
+process.on('uncaughtException', (err) => {
+  // something went unhandled.
+  // Do any cleanup and exit anyway!
+
+  console.error(err); // don't do just that.
+
+  // FORCE exit the process too.
+  process.exit(1);
+});
+```
+
+However, imagine that multiple error events happen at the exact same time. This means the uncaughtException listener above will be triggered multiple times, which might be a problem for some cleanup code. An example of this is when multiple calls are made to a database shutdown action.
+
+The EventEmitter module exposes a once method. This method signals to invoke the listener just once, not every time it happens. So, this is a practical use case to use with the uncaughtException because with the first uncaught exception we’ll start doing the cleanup and we know that we’re going to exit the process anyway.
+
+## Order of Listeners
+
+If we register multiple listeners for the same event, the invocation of those listeners will be in order. The first listener that we register is the first listener that gets invoked.
+
+```javascript
+// प्रथम
+withTime.on('data', (data) => {
+  console.log(`Length: ${data.length}`);
+});
+
+// दूसरा
+withTime.on('data', (data) => {
+  console.log(`Characters: ${data.toString().length}`);
+});
+
+withTime.execute(fs.readFile, __filename);
+```
+The above code will cause the “Length” line to be logged before the “Characters” line, because that’s the order in which we defined those listeners.
+
+If you need to define a new listener, but have that listener invoked first, you can use the `prependListener` method:
+
+```javascript
+// प्रथम
+withTime.on('data', (data) => {
+  console.log(`Length: ${data.length}`);
+});
+
+// दूसरा
+withTime.prependListener('data', (data) => {
+  console.log(`Characters: ${data.toString().length}`);
+});
+
+withTime.execute(fs.readFile, __filename);
+```
+
+The above will cause the “Characters” line to be logged first.
+
+And finally, if you need to remove a listener, you can use the removeListener method.
 
 
 ## Wrangling the File System
