@@ -2093,8 +2093,60 @@ Then I connected to the server. Note what happened to the memory consumed:
 
 <img src="https://cdn-images-1.medium.com/max/1000/1*SGJw31T5Q9Zfsk24l2yirg.gif"/>
 
+Wow — the memory consumption jumped to 434.8 MB.
+
+We basically put the whole `big.file` content in memory before we wrote it out to the **response** object. This is very inefficient.
+
+The HTTP response object (res in the code above) is also a **writable** stream. This means if we have a **readable** stream that represents the content of `big.file`, we can just pipe those two on each other and achieve mostly the same result without consuming ~400 MB of memory.
+
+Node’s **fs** module can give us a **readable** stream for any file using the **createReadStream** method. We can *pipe that to the response object:*
+
+```javascript
+const fs = require('fs');
+const server = require('http').createServer();
+
+server.on('request', (req, res) => {
+  const src = fs.createReadStream('./big.file');
+  src.pipe(res);
+});
+
+server.listen(8000);
+```
+
+Now when you connect to this server, a magical thing happens (look at the memory consumption):
+
+<img src = "https://cdn-images-1.medium.com/max/1000/1*iWNNIMhF9QmD25Vho6-fRQ.gif"/>
+
+What’s happening?
+
+When a client asks for that big file, we stream it one chunk at a time, which means we don’t buffer it in memory at all. The memory usage grew by about 25 MB and that’s it.
+
+You can push this example to its limits. Regenerate the big.file with five million lines instead of just one million, which would take the file to well over 2 GB, and that’s actually bigger than the default buffer limit in Node.
+
+If you try to serve that file using fs.readFile, you simply can’t, by default (you can change the limits). But with fs.createReadStream, there is no problem at all streaming 2 GB of data to the requester, and best of all, the process memory usage will roughly be the same.
 
 
+Ready to learn streams now?
+
+## Streams 101
+
+There are four fundamental stream types in Node.js: `Readable, Writable, Duplex`, and `Transform` streams.
+
+A readable stream is an abstraction for a source from which data can be consumed. An example of that is the fs.createReadStream method.
+A writable stream is an abstraction for a destination to which data can be written. An example of that is the fs.createWriteStream method.
+A duplex streams is both Readable and Writable. An example of that is a TCP socket.
+A transform stream is basically a duplex stream that can be used to modify or transform the data as it is written and read. An example of that is the zlib.createGzip stream to compress the data using gzip. You can think of a transform stream as a function where the input is the writable stream part and the output is readable stream part. You might also hear transform streams referred to as “through streams.”
+All streams are instances of EventEmitter. They emit events that can be used to read and write data. However, we can consume streams data in a simpler way using the pipe method.
+
+
+
+
+
+
+
+_______________________________________________________________________________________________________________________________________
+---------------------------------------------------------------------------------------------------------------------------------------
+_______________________________________________________________________________________________________________________________________
 ## Wrangling the File System
 
 <h3>Programming for the Node.js Event Loop</h3>
