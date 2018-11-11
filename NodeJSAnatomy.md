@@ -2139,6 +2139,72 @@ A transform stream is basically a duplex stream that can be used to modify or tr
 All streams are instances of EventEmitter. They emit events that can be used to read and write data. However, we can consume streams data in a simpler way using the pipe method.
 
 
+## The pipe method
+Here’s the magic line that you need to remember:
+
+```javascript
+readableSrc.pipe(writableDest)
+```
+In this simple line, we’re piping the output of a readable stream — the source of data, as the input of a writable stream — the destination. The source has to be a readable stream and the destination has to be a writable one. Of course, they can both be duplex/transform streams as well. In fact, if we’re piping into a duplex stream, we can chain pipe calls just like we do in Linux:
+
+
+```javascript
+readableSrc
+  .pipe(transformStream1)
+  .pipe(transformStream2)
+  .pipe(finalWrtitableDest)
+  ```
+  The pipe method returns the destination **stream**, which enabled us to do the chaining above. For `streams a (readable), b and c (duplex), and d (writable)`, we can:
+  
+  ```
+  a.pipe(b).pipe(c).pipe(d)
+# Which is equivalent to:
+a.pipe(b)
+b.pipe(c)
+c.pipe(d)
+# Which, in Linux, is equivalent to:
+$ a | b | c | d
+```
+
+The **pipe** method is the easiest way to consume streams. It’s generally recommended to either use the pipe method or consume streams with events, but avoid mixing these two. Usually when you’re using the pipe method you don’t need to use events, but if you need to consume the streams in more custom ways, events would be the way to go.
+
+## Stream events
+Beside reading from a readable stream source and writing to a writable destination, the pipe method automatically manages a few things along the way. For example, it handles errors, end-of-files, and the cases when one stream is slower or faster than the other.
+
+However, streams can also be consumed with events directly. Here’s the simplified event-equivalent code of what the pipe method mainly does to read and write data:
+
+```javascript
+# readable.pipe(writable)
+readable.on('data', (chunk) => {
+  writable.write(chunk);
+});
+readable.on('end', () => {
+  writable.end();
+});
+```
+
+Here’s a list of the important events and functions that can be used with readable and writable streams:
+
+<img src = "https://cdn-images-1.medium.com/max/1000/1*HGXpeiF5-hJrOk_8tT2jFA.png"/>
+
+The events and functions are somehow related because they are usually used together.
+
+* The most important events on a readable stream are:
+
+* The data event, which is emitted whenever the stream passes a chunk of data to the consumer
+
+* The end event, which is emitted when there is no more data to be consumed from the stream.
+
+* The most important events on a writable stream are:
+
+* The drain event, which is a signal that the writable stream can receive more data.
+
+* The finish event, which is emitted when all data has been flushed to the underlying system.
+
+Events and functions can be combined to make for a custom and optimized use of streams. To consume a readable stream, we can use the pipe/unpipe methods, or the **read/unshift/resume methods**. To consume a writable stream, we can make it the destination of **pipe/unpipe**, or just write to it with the **write** method and `call the end method when we’re done`.
+
+
+
 
 
 
