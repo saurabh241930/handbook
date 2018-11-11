@@ -2006,6 +2006,95 @@ The above will cause the “Characters” line to be logged first.
 And finally, if you need to remove a listener, you can use the removeListener method.
 
 
+# Node.js Streams: Everything you need to know
+
+Node.js streams have a reputation for being hard to work with, and even harder to understand. Well I’ve got good news for you — that’s no longer the case.
+
+Over the years, developers created lots of packages out there with the sole purpose of making working with streams easier. But in this article, I’m going to focus on the native [Node.js stream API](https://nodejs.org/api/stream.html).
+
+  <h2>“Streams are Node’s best and most misunderstood idea.”</h2>
+  <h3>— Dominic Tarr</h3>
+  
+  
+  ## What exactly are streams?
+  
+  Streams are collections of data — just like arrays or strings. The difference is that streams might not be available all at once, and `they don’t have to fit in memory`. This makes streams really powerful when working with large amounts of data, or data that’s coming from an `external source one chunk at a time`.
+
+However, streams are not only about working with big data. They also give us the power of composability in our code. Just like we can compose powerful `linux` commands by **piping** other smaller Linux commands, we can do exactly the same in Node with streams.
+
+<img src="https://cdn-images-1.medium.com/max/1000/1*Fp3dyVZckIUjPFOp58x-zQ.png"/>
+
+```javascript
+const grep = ... // A stream for the grep output
+const wc = ... // A stream for the wc input
+grep.pipe(wc)
+```
+
+Many of the built-in modules in Node implement the streaming interface:
+
+<img src = "https://cdn-images-1.medium.com/max/1000/1*lhOvZiDrVbzF8_l8QX3ACw.png"/>
+
+The list above has some examples for native Node.js objects that are also readable and writable streams. Some of these objects are both readable and writable streams, like **TCP** sockets, zlib and crypto streams.
+
+Notice that the objects are also closely related. While an HTTP response is a readable stream on the client, it’s a writable stream on the server. This is because in the **HTTP** case, we basically read from one object (http.IncomingMessage) and write to the other (http.ServerResponse).
+
+Also note how the stdio streams **`(stdin, stdout, stderr)`** have the inverse stream types when it comes to child processes. This allows for a really easy way to pipe to and from these streams from the main process **stdio** streams.
+
+## A streams practical example
+
+Theory is great, but often not 100% convincing. Let’s see an example demonstrating the difference streams can make in code when it comes to memory consumption.
+
+Let’s create a big file first:
+
+```javascript
+const fs = require('fs');
+const file = fs.createWriteStream('./big.file');
+
+for(let i=0; i<= 1e6; i++) {
+  file.write('Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\n');
+}
+
+file.end();
+```
+
+Look what I used to create that big file. A writable stream!
+
+The fs module can be used to read from and write to files using a stream interface. In the example above, we’re writing to that big.file through a writable stream 1 million lines with a loop.
+
+Running the script above generates a file that’s about ~400 MB.
+
+Here’s a simple Node web server designed to exclusively serve the **big.file:**
+
+```javascript
+const fs = require('fs');
+const server = require('http').createServer();
+
+server.on('request', (req, res) => {
+  fs.readFile('./big.file', (err, data) => {
+    if (err) throw err;
+  
+    res.end(data);
+  });
+});
+
+server.listen(8000);
+```
+
+When the server gets a request, it’ll serve the big file using the **asynchronous** method, `fs.readFile`. But hey, it’s not like we’re **blocking** the event loop or anything. Every thing is great, right? Right?
+
+Well, let’s see what happens when we run the server, connect to it, and monitor the memory while doing so.
+
+When I ran the server, it started out with a normal amount of memory, 8.7 MB:
+
+
+<img src="https://cdn-images-1.medium.com/max/1000/1*125_8HQ4KzJkeBcj1LcEiQ.png"/>
+
+Then I connected to the server. Note what happened to the memory consumed:
+
+<img src="https://cdn-images-1.medium.com/max/1000/1*SGJw31T5Q9Zfsk24l2yirg.gif"/>
+
+
+
 ## Wrangling the File System
 
 <h3>Programming for the Node.js Event Loop</h3>
