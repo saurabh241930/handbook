@@ -2204,6 +2204,210 @@ The events and functions are somehow related because they are usually used toget
 Events and functions can be combined to make for a custom and optimized use of streams. To consume a readable stream, we can use the pipe/unpipe methods, or the **read/unshift/resume methods**. To consume a writable stream, we can make it the destination of **pipe/unpipe**, or just write to it with the **write** method and `call the end method when we’re done`.
 
 
+## Paused and Flowing Modes of Readable Streams
+
+Readable streams have two main modes that affect the way we can consume them:
+
+* They can be either in the paused mode
+* Or in the flowing mode
+Those modes are sometimes referred to as pull and push modes.
+
+All readable streams start in the paused mode by default but they can be easily switched to flowing and back to paused when needed. Sometimes, the switching happens automatically.
+
+When a readable stream is in the paused mode, we can use the `read()` method to read from the stream on demand, however, for a readable stream in the flowing mode, the data is continuously flowing and we have to listen to events to consume it.
+
+In the flowing mode, data can actually be lost if no consumers are available to handle it. This is why, when we have a readable stream in `flowing mode`, we need a `data event handler`. In fact, just adding a `data event handler` switches a paused stream into flowing mode and removing the data event handler switches the stream back to paused mode. Some of this is done for backward compatibility with the older Node streams interface.
+
+To manually switch between these two stream modes, you can use the `resume()` and `pause()` methods.
+
+<img src = "https://cdn-images-1.medium.com/max/1000/1*HI-mtispQ13qm8ib5yey3g.png" />
+
+When consuming readable streams using the *pipe* method, 
+we don’t have to worry about these modes as pipe manages them automatically.
+
+## Implementing Streams
+
+When we talk about streams in Node.js, there are two main different tasks:
+
+* The task of implementing the streams.
+
+* The task of consuming them.
+
+So far we’ve been talking about only consuming streams. Let’s implement some!
+
+Stream implementers are usually the ones who `require` the stream module.
+
+### Implementing a Writable Stream
+
+To implement a writable stream, we need to to use the Writable constructor from the stream module.
+
+```javascript
+const { Writable } = require('stream');
+```
+
+We can implement a writable stream in many ways. We can, for example, extend the Writable constructor if we want
+
+```javascript
+class myWritableStream extends Writable {
+}
+```
+
+However, I prefer the simpler `constructor` approach. We just create an `object` from the Writable constructor and pass it a number of options. The only required option is a write function which exposes the chunk of data to be written.
+
+```javascript
+
+const { Writable } = require('stream');
+const outStream = new Writable({
+  write(chunk, encoding, callback) {
+    console.log(chunk.toString());
+    callback();
+  }
+});
+
+process.stdin.pipe(outStream);
+```
+
+This write method takes three arguments.
+
+* The chunk is usually a buffer unless we configure the stream differently.
+* The encoding argument is needed in that case, but usually we can ignore it.
+* The callback is a function that we need to call after we’re done processing the data chunk. It’s what signals whether the write was successful or not. To signal a failure, call the callback with an error object.
+
+In `outStream`, we simply console.log the chunk as a string and call the `callback` after that without an error to indicate success. This is a very simple and probably not so useful echo stream. It will echo back anything it receives.
+
+To consume this stream, we can simply use it with `process.stdin`, which is a readable stream, so we can just pipe `process.stdin` into our `outStream`.
+
+When we run the code above, anything we type into process.stdin will be echoed back using the outStream `console.log` line.
+
+This is not a very useful stream to implement because it’s actually already implemented and built-in. This is very much equivalent to `process.stdout`. We can just pipe `stdin` into `stdout` and we’ll get the exact same echo feature with this single line:
+
+```javascript
+process.stdin.pipe(process.stdout);
+```
+### Implement a Readable Stream
+
+To implement a readable stream, we require the Readable interface, and construct an object from it, and implement a `read()` method in the stream’s configuration parameter:
+
+
+```javascript
+const { Readable } = require('stream');
+const inStream = new Readable({
+  read() {}
+});
+```
+There is a simple way to implement readable streams. We can just directly `push` the data that we want the consumers to consume.
+
+```javascript
+const { Readable } = require('stream'); 
+const inStream = new Readable({
+  read() {}
+});
+inStream.push('ABCDEFGHIJKLM');
+inStream.push('NOPQRSTUVWXYZ');
+inStream.push(null); // No more data
+inStream.pipe(process.stdout);
+```
+
+When we push a null `object`, that means we want to signal that the stream does not have any more data.
+
+To consume this simple `readable stream`, we can simply pipe it into the writable stream `process.stdout`.
+
+When we run the code above, we’ll be reading all the data from inStream and echoing it to the standard out. Very simple, but also not very efficient.
+
+We’re basically pushing all the data in the stream before piping it to process.stdout. The much better way is to `push` data on demand, when a consumer asks for it. We can do that by implementing the `read()` method in the configuration object:
+
+```javascript
+const inStream = new Readable({
+  read(size) {
+    // there is a demand on the data... Someone wants to read it.
+  }
+});
+```
+
+When the read method is called on a `readable` stream, the implementation can push partial data to the queue. For example, we can push one letter at a time, starting with character code 65 (which represents A), and incrementing that on every push:
+
+```javascript
+
+const inStream = new Readable({
+  read(size) {
+    this.push(String.fromCharCode(this.currentCharCode++));
+    if (this.currentCharCode > 90) {
+      this.push(null);
+    }
+  }
+});
+inStream.currentCharCode = 65;
+inStream.pipe(process.stdout);
+```
+
+While the consumer is reading a `readable` stream, the read method will continue to fire, and we’ll push more letters. We need to stop this cycle somewhere, and that’s why an if statement to push null when the currentCharCode is greater than 90 (which represents Z).
+
+This code is equivalent to the simpler one we started with but now we’re pushing data on demand when the consumer asks for it. You should always do that.
+
+### Implementing Duplex/Transform Streams
+
+With Duplex streams, we can implement both readable and writable streams with the same object. It’s as if we inherit from both interfaces.
+
+Here’s an example duplex stream that combines the two writable and readable examples implemented above:
+
+```javascript
+const { Duplex } = require('stream');
+
+const inoutStream = new Duplex({
+  write(chunk, encoding, callback) {
+    console.log(chunk.toString());
+    callback();
+  },
+
+  read(size) {
+    this.push(String.fromCharCode(this.currentCharCode++));
+    if (this.currentCharCode > 90) {
+      this.push(null);
+    }
+  }
+});
+
+inoutStream.currentCharCode = 65;
+process.stdin.pipe(inoutStream).pipe(process.stdout);
+```
+
+By combining the methods, we can use this duplex stream to read the letters from A to Z and we can also use it for its echo feature. We pipe the readable stdin stream into this duplex stream to use the echo feature and we `pipe` the `duplex` stream itself into the `writable` stdout stream to see the letters A through Z.
+
+It’s important to understand that the readable and writable sides of a `duplex` stream operate completely independently from one another. This is merely a grouping of two features into an object.
+
+A transform stream is the more interesting duplex stream because its output is computed from its input.
+
+For a transform stream, we don’t have to implement the `read` or write methods, we only need to implement a transform method, which combines both of them. It has the signature of the write method and we can use it to `push` data as well.
+
+
+Here’s a simple transform stream which echoes back anything you type into it after transforming it to upper case format:
+
+```javascript
+const { Transform } = require('stream');
+
+const upperCaseTr = new Transform({
+  transform(chunk, encoding, callback) {
+    this.push(chunk.toString().toUpperCase());
+    callback();
+  }
+});
+
+process.stdin.pipe(upperCaseTr).pipe(process.stdout);
+```
+
+In this transform stream, which we’re consuming exactly like the previous duplex stream example, we only implemented a `transform()` method. In that method, we convert the `chunk` into its upper case version and then push that version as the readable part.
+
+### Streams Object Mode
+By default, streams expect Buffer/String values. There is an objectMode flag that we can set to have the stream accept any JavaScript object.
+
+Here’s a simple example to demonstrate that. The following combination of transform streams makes for a feature to map a string of comma-separated values into a JavaScript object. So “a,b,c,d” becomes {a: b, c: d}.
+
+
+
+
+
+
+
 
 
 
