@@ -2400,7 +2400,108 @@ In this transform stream, which we’re consuming exactly like the previous dupl
 ### Streams Object Mode
 By default, streams expect Buffer/String values. There is an objectMode flag that we can set to have the stream accept any JavaScript object.
 
-Here’s a simple example to demonstrate that. The following combination of transform streams makes for a feature to map a string of comma-separated values into a JavaScript object. So “a,b,c,d” becomes {a: b, c: d}.
+Here’s a simple example to demonstrate that. The following combination of transform streams makes for a feature to map a string of comma-separated values into a JavaScript object. So “a,b,c,d” becomes `{a: b, c: d}`
+
+```javascript
+const { Transform } = require('stream');
+const commaSplitter = new Transform({
+  readableObjectMode: true,
+  transform(chunk, encoding, callback) {
+    this.push(chunk.toString().trim().split(','));
+    callback();
+  }
+});
+const arrayToObject = new Transform({
+  readableObjectMode: true,
+  writableObjectMode: true,
+  transform(chunk, encoding, callback) {
+    const obj = {};
+    for(let i=0; i < chunk.length; i+=2) {
+      obj[chunk[i]] = chunk[i+1];
+    }
+    this.push(obj);
+    callback();
+  }
+});
+const objectToString = new Transform({
+  writableObjectMode: true,
+  transform(chunk, encoding, callback) {
+    this.push(JSON.stringify(chunk) + '\n');
+    callback();
+  }
+});
+process.stdin
+  .pipe(commaSplitter)
+  .pipe(arrayToObject)
+  .pipe(objectToString)
+  .pipe(process.stdout)
+  ```
+  
+  We pass the input string (for example, “a,b,c,d”) through commaSplitter which pushes an array as its readable data `([“a”, “b”, “c”, “d”])`. Adding the `readableObjectMode` flag on that stream is necessary because we’re pushing an object there, not a string.
+
+We then take the array and `pipe` it into the `arrayToObject` stream. We need a `writableObjectMode` flag to make that stream accept an object. It’ll also push an object (the input array mapped into an object) and that’s why we also needed the readableObjectMode flag there as well. The last objectToString stream accepts an object but pushes out a string, and that’s why we only needed a `writableObjectMode` flag there. The readable part is a normal string (the stringified object).
+
+<img src="https://cdn-images-1.medium.com/max/1000/1*u2kQzUD0ruPpt-xx0UOHoA.png"/>
+
+### Node’s built-in transform streams
+Node has a few very useful built-in transform streams. Namely, the zlib and crypto streams.
+
+Here’s an example that uses the `zlib.createGzip()` stream combined with the fs readable/writable streams to create a file-compression script:
+
+
+```javascript
+const fs = require('fs');
+const zlib = require('zlib');
+const file = process.argv[2];
+
+fs.createReadStream(file)
+  .pipe(zlib.createGzip())
+  .pipe(fs.createWriteStream(file + '.gz'));
+  ```
+  
+  You can use this script to gzip any file you pass as the argument. We’re piping a readable stream for that file into the zlib built-in transform stream and then into a writable stream for the new gzipped file. Simple.
+
+The cool thing about using pipes is that we can actually combine them with events if we need to. Say, for example, I want the user to see a progress indicator while the script is working and a “Done” message when the script is done. Since the `pipe` method returns the destination stream, we can chain the registration of events handlers as well:
+
+```javascript
+const fs = require('fs');
+const zlib = require('zlib');
+const file = process.argv[2];
+
+fs.createReadStream(file)
+  .pipe(zlib.createGzip())
+  .on('data', () => process.stdout.write('.'))
+  .pipe(fs.createWriteStream(file + '.zz'))
+  .on('finish', () => console.log('Done'));
+  ```
+  
+  So with the pipe method, we get to easily consume streams, but we can still further customize our interaction with those streams using events where needed.
+
+What’s great about the pipe method though is that we can use it to compose our program piece by piece, in a much readable way. For example, instead of listening to the data event above, we can simply create a transform stream to report progress, and replace the `.on()` call with another `.pipe()` call:
+
+```javascript
+const fs = require('fs');
+const zlib = require('zlib');
+const file = process.argv[2];
+
+const { Transform } = require('stream');
+
+const reportProgress = new Transform({
+  transform(chunk, encoding, callback) {
+    process.stdout.write('.');
+    callback(null, chunk);
+  }
+});
+
+fs.createReadStream(file)
+  .pipe(zlib.createGzip())
+  .pipe(reportProgress)
+  .pipe(fs.createWriteStream(file + '.zz'))
+  .on('finish', () => console.log('Done'));
+  ```
+
+
+  
 
 
 
