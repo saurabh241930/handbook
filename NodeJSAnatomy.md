@@ -2500,6 +2500,36 @@ fs.createReadStream(file)
   .on('finish', () => console.log('Done'));
   ```
 
+This reportProgress stream is a simple pass-through stream, but it reports the progress to standard out as well. Note how I used the second argument in the `callback()` function to push the data inside the `transform()` method. This is equivalent to pushing the data first.
+
+The applications of combining streams are endless. For example, if we need to encrypt the file before or after we gzip it, all we need to do is `pipe` another transform stream in that exact order that we needed. We can use Node’s `crypto` module for that:
+
+```javascript
+const crypto = require('crypto');
+// ...
+fs.createReadStream(file)
+  .pipe(zlib.createGzip())
+  .pipe(crypto.createCipher('aes192', 'a_secret'))
+  .pipe(reportProgress)
+  .pipe(fs.createWriteStream(file + '.zz'))
+  .on('finish', () => console.log('Done'));
+  ```
+  
+  The script above compresses and then encrypts the passed file and only those who have the secret can use the outputted file. We can’t unzip this file with the normal unzip utilities because it’s encrypted.
+
+To actually be able to unzip anything zipped with the script above, we need to use the opposite streams for crypto and zlib in a reverse order, which is simple:
+
+```javascript
+fs.createReadStream(file)
+  .pipe(crypto.createDecipher('aes192', 'a_secret'))
+  .pipe(zlib.createGunzip())
+  .pipe(reportProgress)
+  .pipe(fs.createWriteStream(file.slice(0, -3)))
+  .on('finish', () => console.log('Done'));
+  ```
+  
+  Assuming the passed file is the compressed version, the code above will create a read stream from that, pipe it into the crypto `createDecipher()` stream (using the same secret), pipe the output of that into the zlib `createGunzip()` stream, and then write things out back to a file without the extension part.
+
 
   
 
