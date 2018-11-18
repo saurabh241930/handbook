@@ -2997,11 +2997,131 @@ This program writes “a witty message” to target.txt (creating it if it doesn
 or overwriting it if it does). If for any reason the file couldn’t be written, then
 the err parameter will contain an Error object.
 
+## Creating Read and Write Streams
+
+You create a read stream or a write stream by using fs.createReadStream() and
+fs.createWriteStream(), respectively. For example, here’s a very short program
+called cat.js. It uses a file stream to pipe a file’s data to standard output:
+
+```javascript
+file-system/cat.js
+#!/usr/bin/env node --harmony
+require('fs').createReadStream(process.argv[2]).pipe(process.stdout);
+```
+
+Because the first line starts with #!, you can execute this program directly in
+Unix-like systems. It doesn’t need to be passed into the node program.
+Use `chmod` to make it executable:
+
+`$ chmod +x cat.js`
+Then, to run it, send the name of the chosen file as an additional argument:
+`$ ./cat.js <file_name>`
+The code in cat.js does not bother assigning the fs module to a variable. The
+`require() `function returns a module object, so we can call methods on it
+directly.
+You can also listen for data events from the file stream instead of calling pipe().
+The following program called read-stream.js does this:
 
 
+```javascript
+file-system/read-stream.js
+const
+fs = require('fs'),
+stream = fs.createReadStream(process.argv[2]);
+stream.on('data', function(chunk) {
+process.stdout.write(chunk);
+});
+stream.on('error', function(err) {
+process.stderr.write("ERROR: " + err.message + "\n");
+});
+```
 
+Here we use `process.stdout.write()` to echo data, rather than `console.log()`. The
+incoming data chunks already contain any newline characters from the input
+file. We don’t need the extra line that `console.log()` would add.
+When working with an EventEmitter, the way to handle errors is to listen for
+error events. Let’s trigger an error to see what happens. Run the program, but
+specify a file that doesn’t exist:
 
+```
+$ node --harmony read-stream.js no-such-file
+ERROR: ENOENT, open 'no-such-file'
+```
+Since we’re listening for error events, Node invokes our handler (and then
+proceeds to exit normally). If you don’t listen for error events, but one happens
+anyway, Node will throw an exception. And as we saw before, an uncaught
+exception will cause the process to terminate
 
+## Blocking the Event Loop with Synchronous File Access
+
+The file-access methods we’ve discussed in this chapter so far are asynchronous.
+They perform their I/O duties—waiting as necessary—completely
+in the background, only to invoke callbacks later. This is by far the preferred
+way to do I/O in Node.
+
+Even so, many of the methods in the fs module have synchronous versions
+as well. These end in **Sync**, like readFileSync, for example. Doing synchronous
+file access might look familiar to you if you haven’t done a lot of async development
+in the past. However, it comes at a substantial cost.
+
+When you use the **Sync** methods, the Node.js process will block until the
+I/O finishes. This means Node won’t execute any other code, won’t trigger
+any callbacks, won’t process any events, won’t accept any connections—nothing.
+It’ll just sit there indefinitely waiting for the operation to complete.
+
+However, synchronous methods are simpler to use since they lack the callback
+step. They either return successfully or throw an exception, without the need
+for a callback function. There actually are cases where this style of access is
+OK; we’ll discuss them in the next section.
+
+Here’s an example of how to read a file using the **readFileSync()** method:
+
+```javascript
+const
+fs = require('fs'),
+data = fs.readFileSync('target.txt');
+process.stdout.write(data.toString());
+```
+The return value of **readFileSync()** is a buffer—the same as the parameter passed
+to callbacks of the asynchronous **readFile()** method we saw before.
+
+## Performing Other File-System Operations
+
+Node’s fs module has many other methods that map nicely onto `POSIX` conventions.
+(POSIX is a family of standards for interoperability between operating
+systems—including file-system utilities.) To name a few examples, you can
+**`copy()`** files and **`unlink()`** (delete) them. You can use **`chmod()`** to change permissions
+and **`mkdir()`** to create directories.
+
+These functions rely on the same kinds of callback parameters we’ve used in
+this chapter. They’re all asynchronous by default, but many come with
+equivalent *Sync versions.*
+
+### The Two Phases of a Node Program
+
+Given the cost that blocking has on the Node event loop, you might think it’s
+always bad to use synchronous file-access methods. To understand when it’s
+OK, you can think of Node programs as having two phases.
+In the initialization phase, the program is getting set up, bringing in libraries,
+reading configuration parameters, and doing other mission-critical tasks. If
+something goes wrong at this early stage, not much can be done, and it’s best
+to fail fast. The only time you should consider synchronous file access is
+during the initialization phase of your program.
+
+The second phase is the operation phase, when the program churns through
+the event loop. Since many Node programs are networked, this means
+accepting connections, making requests, and waiting on other kinds of I/O.
+You should never use synchronous file-access methods during this phase.
+The **require()** function is an example of this principle in action—it synchronously
+evaluates the target module’s code and returns the module object. Either the
+module will successfully load, or the program will fail right away
+
+As a rule of thumb, if your program couldn’t possibly succeed without the
+file, then it’s OK to use synchronous file access. If your program could conceivably
+continue about its business, then it’s better to take the safe route
+and stick to asynchronous I/O.
+
+# Networking with Sockets
 
 
 
