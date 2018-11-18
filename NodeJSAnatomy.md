@@ -2531,7 +2531,36 @@ fs.createReadStream(file)
   Assuming the passed file is the compressed version, the code above will create a read stream from that, pipe it into the crypto `createDecipher()` stream (using the same secret), pipe the output of that into the zlib `createGunzip()` stream, and then write things out back to a file without the extension part.
 
 
+ ## Running python using spawn
+ 
+ ```javascript
+ const { spawn } = require('child_process');
+//const child = spawn('touch',['file.py']);
+const child  = spawn('python',['file.py'])
+
+
+child.stdout.on('data', (data) => {
+    console.log(`child stdout:\n${data}`);
+  });
   
+  child.stderr.on('data', (data) => {
+    console.error(`child stderr:\n${data}`);
+  });
+  ```
+  
+  this file is running this python script
+  ```python
+  #!/usr/bin/python
+
+import os, sys
+
+#os.mkdir("test")
+
+if os.path.exists("test"):
+  os.rmdir("test")
+else:
+  print("The folder does not exist")
+  ```
 
 
 
