@@ -530,17 +530,6 @@ def fibonacci(n):
     return fibonacci(n-1) + fibonacci(n-2)
  ```
  
- 
-  <h2>Exponential Time — O(2^n)</h2>
-An algorithm is said to have an exponential time complexity when the growth doubles with each addition to the input data set. This kind of time complexity is usually seen in brute-force algorithms.
-
-```python
-def fibonacci(n):
-    if n <= 1:
-        return n
-    return fibonacci(n-1) + fibonacci(n-2)
- ```
- 
    <h2>Important Notes</h2>
 It is important to note that when analyzing the time complexity of an algorithm with several operations we need to describe the algorithm based on the largest complexity among all operations. For example:
 
@@ -558,7 +547,7 @@ def my_function(data):
  Even that the operations in ‘my_function’ don’t make sense we can see that it has multiple time complexities: O(1) + O(n) + O(n²). So, when increasing the size of the input data, the bottleneck of this algorithm will be the operation that takes O(n²). Based on this, we can describe the time complexity of this algorithm as O(n²).
  
 
-
+<img src="https://miro.medium.com/max/700/1*Uzrw9faXdYgg20I6NjUTBw.png"/>
 ________________________________________________________________________________________________________________________________________
 
 
