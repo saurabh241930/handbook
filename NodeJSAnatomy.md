@@ -21,6 +21,9 @@
 
 [ES6 - class](https://github.com/saurabh241930/handbook/blob/master/NodeJSAnatomy.md#-es6---class-)
 
+[Space time complexity](https://github.com/saurabh241930/handbook/blob/master/NodeJSAnatomy.md#overiding-with-call--)
+
+
 
 **`Please note that this is my personal overview on node ,this maybe not 100% correct`**
 
@@ -464,7 +467,96 @@ greeter1.greet('Tony');
 *asynchronous* is one of the major reason why **NODE** exist , but note that **Javascript** and **V8** both are ***synchronous*** in nature ,since **NodeJS** is running both at same time , thats what make it **asynchronous**
 
 
+# Space Time complexity
 
+Time Complexities
+
+<h2>Constant Time — O(1)</h2>
+An algorithm is said to have a constant time when it is not dependent on the input data (n). No matter the size of the input data, the running time will always be the same. For example:
+
+```python
+if a > b:
+    return True
+else:
+    return False
+```
+
+
+<h2>Logarithmic Time — O(log n)</h2>
+An algorithm is said to have a logarithmic time complexity when it reduces the size of the input data in each step (it don’t need to look at all values of the input data), for example:
+
+```python
+for index in range(0, len(data), 3):
+    print(data[index])
+ ```
+ 
+ <h2>Quasilinear Time — O(n log n)</h2>
+An algorithm is said to have a quasilinear time complexity when each operation in the input data have a logarithm time complexity. It is commonly seen in sorting algorithms (e.g. mergesort, timsort, heapsort).
+For example: for each value in the data1 (O(n)) use the binary search (O(log n)) to search the same value in data2.
+
+```python
+for value in data1:
+    result.append(binary_search(data2, value))
+ ```
+ 
+ <h2>Quadratic Time — O(n²)</h2>
+An algorithm is said to have a quadratic time complexity when it needs to perform a linear time operation for each value in the input data, for example:
+
+```python
+for x in data:
+    for y in data:
+        print(x, y)
+ ```
+ 
+ 
+ <h2>Exponential Time — O(2^n)</h2>
+An algorithm is said to have an exponential time complexity when the growth doubles with each addition to the input data set. This kind of time complexity is usually seen in brute-force algorithms.
+
+```python
+def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+ ```
+ 
+ 
+  <h2>Factorial — O(n!)</h2>
+An algorithm is said to have an exponential time complexity when the growth doubles with each addition to the input data set. This kind of time complexity is usually seen in brute-force algorithms.
+
+```python
+def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+ ```
+ 
+ 
+  <h2>Exponential Time — O(2^n)</h2>
+An algorithm is said to have an exponential time complexity when the growth doubles with each addition to the input data set. This kind of time complexity is usually seen in brute-force algorithms.
+
+```python
+def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+ ```
+ 
+   <h2>Important Notes</h2>
+It is important to note that when analyzing the time complexity of an algorithm with several operations we need to describe the algorithm based on the largest complexity among all operations. For example:
+
+```python
+def my_function(data):
+    first_element = data[0]
+    
+    for value in data:
+        print(value)
+    
+    for x in data:
+        for y in data:
+            print(x, y)
+ ```
+ Even that the operations in ‘my_function’ don’t make sense we can see that it has multiple time complexities: O(1) + O(n) + O(n²). So, when increasing the size of the input data, the bottleneck of this algorithm will be the operation that takes O(n²). Based on this, we can describe the time complexity of this algorithm as O(n²).
+ 
 
 
 ________________________________________________________________________________________________________________________________________
