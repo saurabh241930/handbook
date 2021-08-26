@@ -21,7 +21,7 @@
 
 [ES6 - class](https://github.com/saurabh241930/handbook/blob/master/NodeJSAnatomy.md#-es6---class-)
 
-[Space time complexity](https://github.com/saurabh241930/handbook/blob/master/NodeJSAnatomy.md#overiding-with-call--)
+[Space time complexity](https://github.com/saurabh241930/handbook/blob/master/NodeJSAnatomy.md#space-time-complexity)
 
 
 
